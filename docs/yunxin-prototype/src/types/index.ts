@@ -216,6 +216,12 @@ export interface DailySample {
   peakHour: number              // 异常峰值时段（0-23）
 }
 
+/** 年级-班级树节点 */
+export interface GradeClassNode {
+  name: string
+  classes: { name: string; total: number; enrolled: number }[]
+}
+
 /** 七类情绪原始标签与颜色 */
 export const RAW_EMOTIONS = [
   { key: 'happy',    label: '快乐',    color: '#F4B942' },

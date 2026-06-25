@@ -1,7 +1,7 @@
 import type {
   Student, StudentRiskProfile, WeeklyMetrics, IndividualBaseline,
   ClassRiskDistribution, AlertItem, UserRole, RiskLevel, InterventionRecord,
-  Camera, DetectionEvent, AIPipelineStage, DailySample, EmotionScores,
+  Camera, DetectionEvent, AIPipelineStage, DailySample, EmotionScores, GradeClassNode,
 } from '@/types'
 
 // ============================================================
@@ -419,7 +419,7 @@ export const DAILY_SAMPLES: DailySample[] = [
 // ============================================================
 
 export const AI_SYSTEM_STATS = {
-  todayTotalDetections: DETECTION_LOG.reduce((s, e) => s + 1, 0) * 780,   // ~14000
+  todayTotalDetections: DETECTION_LOG.reduce((s, e) => s + 1, 0) * 780,
   todayRecognizedFaces: 285,
   avgConfidence: 0.91,
   p95Latency: 38,
@@ -427,4 +427,38 @@ export const AI_SYSTEM_STATS = {
   pipelineUptime: 99.8,
   system1EventCount: 86,
   system2SampleCount: 2450,
+}
+
+// ============================================================
+// 年级班级树 + 人脸注册数据
+// ============================================================
+
+export const GRADE_TREE: GradeClassNode[] = [
+  {
+    name: '初一年级',
+    classes: [
+      { name: '初一(1)班', total: 8, enrolled: 8 },
+      { name: '初一(2)班', total: 8, enrolled: 7 },
+    ],
+  },
+]
+
+/** 学生人脸注册状态 */
+export const FACE_ENROLLMENT: Record<number, { registered: boolean; quality: number; lastUpdated: string }> = {
+  101: { registered: true,  quality: 0.92, lastUpdated: '2026-06-20' },
+  102: { registered: true,  quality: 0.88, lastUpdated: '2026-06-20' },
+  103: { registered: true,  quality: 0.85, lastUpdated: '2026-06-15' },
+  104: { registered: true,  quality: 0.90, lastUpdated: '2026-06-18' },
+  105: { registered: true,  quality: 0.87, lastUpdated: '2026-06-20' },
+  106: { registered: true,  quality: 0.91, lastUpdated: '2026-06-22' },
+  107: { registered: true,  quality: 0.83, lastUpdated: '2026-06-15' },
+  108: { registered: true,  quality: 0.89, lastUpdated: '2026-06-18' },
+  201: { registered: true,  quality: 0.86, lastUpdated: '2026-06-20' },
+  202: { registered: true,  quality: 0.84, lastUpdated: '2026-06-15' },
+  203: { registered: true,  quality: 0.90, lastUpdated: '2026-06-22' },
+  204: { registered: true,  quality: 0.87, lastUpdated: '2026-06-18' },
+  205: { registered: true,  quality: 0.82, lastUpdated: '2026-06-15' },
+  206: { registered: true,  quality: 0.88, lastUpdated: '2026-06-20' },
+  207: { registered: false, quality: 0.00, lastUpdated: '' },
+  208: { registered: true,  quality: 0.85, lastUpdated: '2026-06-18' },
 }
