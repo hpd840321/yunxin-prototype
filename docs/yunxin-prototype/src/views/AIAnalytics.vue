@@ -141,7 +141,12 @@ const avgClassConfidence = computed(() => {
   return logs.reduce((s, e) => s + e.confidence, 0) / logs.length
 })
 
-const classCameraId = computed(() => selectedClass.value === '初一(1)班' ? 1 : 2)
+const CLASS_CAM_MAP: Record<string, number> = {
+  '初一(1)班': 1, '初一(2)班': 2, '初一(3)班': 3, '初一(4)班': 4,
+  '初二(1)班': 5, '初二(2)班': 6, '初二(3)班': 7,
+  '初三(1)班': 8, '初三(2)班': 9,
+}
+const classCameraId = computed(() => CLASS_CAM_MAP[selectedClass.value] ?? 1)
 
 const dailyData = computed(() =>
   DAILY_SAMPLES.filter(d => d.cameraId === classCameraId.value).slice(-7)

@@ -126,7 +126,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { CAMERAS, DETECTION_LOG, GRADE_TREE, FACE_ENROLLMENT, STUDENTS } from '@/mock/data'
+import { CAMERAS, DETECTION_LOG, FACE_ENROLLMENT, STUDENTS } from '@/mock/data'
 import { SCENE_LABELS, STATE_LABELS, RAW_EMOTIONS } from '@/types'
 import GradeClassTree from '@/components/GradeClassTree.vue'
 
@@ -151,12 +151,12 @@ const filteredLog = computed(() => {
 })
 
 const mockFaces = computed(() => {
-  const colors = ['#22C55E', '#7C3AED', '#EF4444', '#EAB308', '#3B82F6']
-  const states = ['投入积极', '困惑思考', '疲惫退缩', '投入积极', '困惑思考']
-  const names = ['张明悦', '李思远', '王雨桐', '陈欣然', '刘一鸣']
-  return names.map((n, i) => ({
-    name: n, state: states[i], color: colors[i],
-    x: 25 + i * 14, y: 20 + (i % 3) * 18,
+  const classStudents = STUDENTS.filter(s => s.className === selectedClass.value).slice(0, 6)
+  const colors = ['#22C55E', '#7C3AED', '#EF4444', '#EAB308', '#3B82F6', '#22C55E']
+  const states = ['投入积极', '困惑思考', '疲惫退缩', '投入积极', '困惑思考', '投入积极']
+  return classStudents.map((s, i) => ({
+    name: s.name, state: states[i % states.length], color: colors[i % colors.length],
+    x: 20 + i * 15, y: 18 + (i % 3) * 20,
   }))
 })
 

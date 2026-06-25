@@ -1,194 +1,243 @@
 import type {
   Student, StudentRiskProfile, WeeklyMetrics, IndividualBaseline,
-  ClassRiskDistribution, AlertItem, UserRole, RiskLevel, InterventionRecord,
+  ClassRiskDistribution, AlertItem, Teacher,
   Camera, DetectionEvent, AIPipelineStage, DailySample, EmotionScores, GradeClassNode,
 } from '@/types'
 
 // ============================================================
-// 学生信息
+// 学校组织架构
 // ============================================================
 
-export const STUDENTS: Student[] = [
-  { id: 101, name: '张明悦', gender: 'female', className: '初一(1)班', grade: '初一年级' },
-  { id: 102, name: '李思远', gender: 'male',   className: '初一(1)班', grade: '初一年级' },
-  { id: 103, name: '王雨桐', gender: 'female', className: '初一(1)班', grade: '初一年级' },
-  { id: 104, name: '赵子轩', gender: 'male',   className: '初一(1)班', grade: '初一年级' },
-  { id: 105, name: '陈欣然', gender: 'female', className: '初一(1)班', grade: '初一年级' },
-  { id: 106, name: '刘一鸣', gender: 'male',   className: '初一(1)班', grade: '初一年级' },
-  { id: 107, name: '孙雅琪', gender: 'female', className: '初一(1)班', grade: '初一年级' },
-  { id: 108, name: '周昊然', gender: 'male',   className: '初一(1)班', grade: '初一年级' },
-  { id: 201, name: '吴梓涵', gender: 'female', className: '初一(2)班', grade: '初一年级' },
-  { id: 202, name: '郑子皓', gender: 'male',   className: '初一(2)班', grade: '初一年级' },
-  { id: 203, name: '林雨萱', gender: 'female', className: '初一(2)班', grade: '初一年级' },
-  { id: 204, name: '黄俊杰', gender: 'male',   className: '初一(2)班', grade: '初一年级' },
-  { id: 205, name: '徐若曦', gender: 'female', className: '初一(2)班', grade: '初一年级' },
-  { id: 206, name: '何子涵', gender: 'male',   className: '初一(2)班', grade: '初一年级' },
-  { id: 207, name: '杨思琪', gender: 'female', className: '初一(2)班', grade: '初一年级' },
-  { id: 208, name: '罗天佑', gender: 'male',   className: '初一(2)班', grade: '初一年级' },
+export const GRADE_TREE: GradeClassNode[] = [
+  {
+    name: '初一年级',
+    classes: [
+      { name: '初一(1)班', total: 8, enrolled: 8 },
+      { name: '初一(2)班', total: 8, enrolled: 7 },
+      { name: '初一(3)班', total: 8, enrolled: 6 },
+      { name: '初一(4)班', total: 6, enrolled: 5 },
+    ],
+  },
+  {
+    name: '初二年级',
+    classes: [
+      { name: '初二(1)班', total: 6, enrolled: 6 },
+      { name: '初二(2)班', total: 6, enrolled: 5 },
+      { name: '初二(3)班', total: 6, enrolled: 6 },
+    ],
+  },
+  {
+    name: '初三年级',
+    classes: [
+      { name: '初三(1)班', total: 6, enrolled: 6 },
+      { name: '初三(2)班', total: 6, enrolled: 4 },
+    ],
+  },
 ]
 
 // ============================================================
-// 辅助：生成周指标
+// 教师数据
 // ============================================================
 
-function week(date: string, label: string, data: Partial<WeeklyMetrics> & { W_Total: number; W_Abnormal_2: number; W_Event_1: number }): WeeklyMetrics {
-  const W_Total = data.W_Total
-  const W_Abnormal_2 = data.W_Abnormal_2
-  const W_Event_1 = data.W_Event_1
+export const TEACHERS: Teacher[] = [
+  // 初一年级班主任
+  { id: 1,  name: '王建国', role: 'head_teacher',    grade: '初一年级', className: '初一(1)班' },
+  { id: 2,  name: '陈美玲', role: 'head_teacher',    grade: '初一年级', className: '初一(2)班' },
+  { id: 3,  name: '张伟',   role: 'head_teacher',    grade: '初一年级', className: '初一(3)班' },
+  { id: 4,  name: '李芳',   role: 'head_teacher',    grade: '初一年级', className: '初一(4)班' },
+  // 初二年级班主任
+  { id: 5,  name: '刘强',   role: 'head_teacher',    grade: '初二年级', className: '初二(1)班' },
+  { id: 6,  name: '赵敏',   role: 'head_teacher',    grade: '初二年级', className: '初二(2)班' },
+  { id: 7,  name: '孙磊',   role: 'head_teacher',    grade: '初二年级', className: '初二(3)班' },
+  // 初三年级班主任
+  { id: 8,  name: '周丽华', role: 'head_teacher',    grade: '初三年级', className: '初三(1)班' },
+  { id: 9,  name: '吴志明', role: 'head_teacher',    grade: '初三年级', className: '初三(2)班' },
+  // 心理老师
+  { id: 10, name: '李心怡', role: 'counselor',       grade: '全校' },
+  { id: 11, name: '徐静',   role: 'counselor',       grade: '初一年级' },
+  // 校领导
+  { id: 12, name: '杨志远', role: 'school_manager',  grade: '全校' },
+  { id: 13, name: '刘慧',   role: 'school_manager',  grade: '全校' },
+  // 任课教师
+  { id: 14, name: '黄磊',   role: 'subject_teacher', grade: '初一年级', subjects: ['语文', '历史'] },
+  { id: 15, name: '林小燕', role: 'subject_teacher', grade: '初一年级', subjects: ['数学'] },
+  { id: 16, name: '何志强', role: 'subject_teacher', grade: '初三年级', subjects: ['英语'] },
+]
+
+// ============================================================
+// 学生信息生成
+// ============================================================
+
+const SURNAMES = '张李王赵陈刘杨黄吴周徐郑孙何罗林马高梁宋'
+const FEMALE_GIVEN = ['悦', '涵', '欣', '雅', '萱', '怡', '婷', '琪', '雨', '瑶', '雪', '蕾', '梦', '思', '嘉']
+const MALE_GIVEN   = ['浩', '明', '宇', '轩', '睿', '泽', '杰', '豪', '鹏', '晨', '晨', '博', '文', '昊', '子']
+
+const CLASS_INFO: { name: string; grade: string }[] = [
+  { name: '初一(1)班', grade: '初一年级' },
+  { name: '初一(2)班', grade: '初一年级' },
+  { name: '初一(3)班', grade: '初一年级' },
+  { name: '初一(4)班', grade: '初一年级' },
+  { name: '初二(1)班', grade: '初二年级' },
+  { name: '初二(2)班', grade: '初二年级' },
+  { name: '初二(3)班', grade: '初二年级' },
+  { name: '初三(1)班', grade: '初三年级' },
+  { name: '初三(2)班', grade: '初三年级' },
+]
+
+let sid = 1
+let si = 0
+
+function pick<T>(arr: T[]): T { return arr[(si++ * 7 + 3) % arr.length] }
+
+function genStudent(className: string, grade: string): Student {
+  const isFemale = (sid + grade.length) % 3 !== 0
+  const surname = pick(SURNAMES)
+  const given = pick(isFemale ? FEMALE_GIVEN : MALE_GIVEN)
+  const name = surname + given + (si % 5 === 0 ? '文' : '')
+  return { id: sid++, name, gender: isFemale ? 'female' : 'male', className, grade }
+}
+
+export const STUDENTS: Student[] = []
+const STUDENT_CLASS_MAP: Record<number, string> = {}
+const CLASS_STUDENT_COUNTS: Record<string, number> = {}
+
+for (const cls of CLASS_INFO) {
+  const count = GRADE_TREE.find(g => g.name === cls.grade)?.classes.find(c => c.name === cls.name)?.total ?? 6
+  for (let i = 0; i < count; i++) {
+    const s = genStudent(cls.name, cls.grade)
+    STUDENTS.push(s)
+    STUDENT_CLASS_MAP[s.id] = cls.name
+    CLASS_STUDENT_COUNTS[cls.name] = (CLASS_STUDENT_COUNTS[cls.name] || 0) + 1
+  }
+}
+
+// ============================================================
+// 周级数据生成辅助
+// ============================================================
+
+function week(date: string, label: string, data: Partial<WeeklyMetrics> & { total: number; abnormal: number; events: number }): WeeklyMetrics {
+  const W_Total = data.total
+  const W_Abnormal_2 = data.abnormal
+  const W_Event_1 = data.events
   const W_Good = data.W_Good ?? Math.round((W_Total - W_Abnormal_2) * 0.45)
   const W_Neutral = W_Total - W_Abnormal_2 - W_Good
-  const W_Ratio = Math.round((W_Abnormal_2 / W_Total) * 10000) / 100
-  const W_Event_Rate = Math.round((W_Event_1 / W_Total) * 10000) / 100
   return {
-    weekStart: date,
-    weekEnd: '',
-    weekLabel: label,
+    weekStart: date, weekEnd: '', weekLabel: label,
     W_Total, W_Abnormal_2, W_Good, W_Neutral,
-    W_Ratio, W_Event_1, W_Event_Rate,
+    W_Ratio: Math.round((W_Abnormal_2 / W_Total) * 10000) / 100,
+    W_Event_1, W_Event_Rate: Math.round((W_Event_1 / W_Total) * 10000) / 100,
     Consecutive_Days: data.Consecutive_Days ?? 0,
     Peak_Day_Flag: data.Peak_Day_Flag ?? false,
   }
 }
 
-function profile(
-  studentId: number,
-  level: RiskLevel,
-  trend: RiskLevel | null,
-  weeks: WeeklyMetrics[],
-  baseline: Partial<IndividualBaseline> = {},
-  records: InterventionRecord[] = [],
-  reassessment: ReassessmentResult | null = null,
-): StudentRiskProfile {
+/** 生成普通绿色学生周数据 */
+function greenWeeks(baseTotal = 2400, abnormalRate = 0.07): WeeklyMetrics[] {
+  const r = () => Math.round(abnormalRate * baseTotal * (0.8 + Math.random() * 0.4))
+  const e = () => Math.round(r() * 0.1)
+  return ['第22周', '第23周', '第24周', '第25周'].map((l, i) =>
+    week('', l, { total: baseTotal - i * 50 + Math.round(Math.random() * 200), abnormal: r(), events: e() })
+  )
+}
+
+// ============================================================
+// 详细风险学生数据（核心16人）
+// ============================================================
+
+const gW = (t: number, a: number, e: number, cd = 0, pf = false) => week('', '', { total: t, abnormal: a, events: e, Consecutive_Days: cd, Peak_Day_Flag: pf })
+
+function profile(studentId: number, level: string, trend: string | null, weeks: WeeklyMetrics[], bl?: Partial<IndividualBaseline>, records?: any[], reassessment?: string | null): StudentRiskProfile {
   const last = weeks[weeks.length - 1]
   return {
     student: STUDENTS.find(s => s.id === studentId)!,
-    currentLevel: level,
-    trend,
+    currentLevel: level as any,
+    trend: trend as any,
     metrics: last,
-    baseline: {
-      B_Ratio: baseline.B_Ratio ?? 12,
-      B_Event_Rate: baseline.B_Event_Rate ?? 8,
-      B_Day_Ratio: baseline.B_Day_Ratio ?? 15,
-      isValid: baseline.isValid ?? true,
-    },
+    baseline: { B_Ratio: bl?.B_Ratio ?? 12, B_Event_Rate: bl?.B_Event_Rate ?? 8, B_Day_Ratio: bl?.B_Day_Ratio ?? 15, isValid: bl?.isValid ?? true },
     weeklyHistory: weeks,
-    interventionRecords: records,
-    reassessmentResult: reassessment,
+    interventionRecords: (records ?? []) as any,
+    reassessmentResult: (reassessment ?? null) as any,
   }
 }
 
-type ReassessmentResult = 'recovered' | 'maintained' | 'worsened'
+/** 生成普通绿色学生画像 */
+function greenProfile(sid: number, bl?: number): StudentRiskProfile {
+  const w = greenWeeks(2400 + (sid % 5) * 100, 0.06 + (sid % 10) * 0.005)
+  return profile(sid, 'green', null, w, { B_Ratio: bl ?? 8 + (sid % 5) })
+}
 
 // ============================================================
-// 周指标生成辅助
-// W_Total 约 2000-2800/周，表示每日 300-400 次采样
-// ============================================================
-
-// ---------- 绿色稳定学生 ----------
-
-const greenW1 = week('2026-06-15', '第25周', { W_Total: 2450, W_Abnormal_2: 180,  W_Event_1: 22 })
-const greenW2 = week('2026-06-08', '第24周', { W_Total: 2380, W_Abnormal_2: 165,  W_Event_1: 18 })
-const greenW3 = week('2026-06-01', '第23周', { W_Total: 2520, W_Abnormal_2: 145,  W_Event_1: 15 })
-const greenW4 = week('2026-05-25', '第22周', { W_Total: 2400, W_Abnormal_2: 155,  W_Event_1: 20 })
-
-// ---------- 绿色-黄色走向学生 ----------
-
-const trendYW1 = week('2026-06-15', '第25周', { W_Total: 2350, W_Abnormal_2: 410,  W_Event_1: 42,  Consecutive_Days: 2, Peak_Day_Flag: true })
-const trendYW2 = week('2026-06-08', '第24周', { W_Total: 2410, W_Abnormal_2: 280,  W_Event_1: 30 })
-
-// ---------- 黄色学生 ----------
-
-const yellowW1 = week('2026-06-15', '第25周', { W_Total: 2280, W_Abnormal_2: 520,  W_Event_1: 55,  Consecutive_Days: 2, Peak_Day_Flag: true })
-const yellowW2 = week('2026-06-08', '第24周', { W_Total: 2350, W_Abnormal_2: 480,  W_Event_1: 50,  Consecutive_Days: 2 })
-
-// ---------- 黄色-红色走向学生 ----------
-
-const trendRW1 = week('2026-06-15', '第25周', { W_Total: 2180, W_Abnormal_2: 780,  W_Event_1: 88,  Consecutive_Days: 3, Peak_Day_Flag: true })
-const trendRW2 = week('2026-06-08', '第24周', { W_Total: 2250, W_Abnormal_2: 520,  W_Event_1: 60,  Consecutive_Days: 2, Peak_Day_Flag: true })
-const trendRW3 = week('2026-06-01', '第23周', { W_Total: 2400, W_Abnormal_2: 380,  W_Event_1: 42 })
-
-// ---------- 红色学生 ----------
-
-const redW1 = week('2026-06-15', '第25周', { W_Total: 2100, W_Abnormal_2: 950,  W_Event_1: 95,  Consecutive_Days: 3, Peak_Day_Flag: true })
-const redW2 = week('2026-06-08', '第24周', { W_Total: 2150, W_Abnormal_2: 820,  W_Event_1: 80,  Consecutive_Days: 3, Peak_Day_Flag: true })
-const redW3 = week('2026-06-01', '第23周', { W_Total: 2300, W_Abnormal_2: 650,  W_Event_1: 65,  Consecutive_Days: 2 })
-const redW4 = week('2026-05-25', '第22周', { W_Total: 2380, W_Abnormal_2: 500,  W_Event_1: 52,  Consecutive_Days: 2 })
-
-// ---------- 黑色学生 ----------
-
-const blackW1 = week('2026-06-15', '第25周', { W_Total: 2000, W_Abnormal_2: 1120, W_Event_1: 120, Consecutive_Days: 5, Peak_Day_Flag: true })
-const blackW2 = week('2026-06-08', '第24周', { W_Total: 2050, W_Abnormal_2: 1050, W_Event_1: 115, Consecutive_Days: 4, Peak_Day_Flag: true })
-const blackW3 = week('2026-06-01', '第23周', { W_Total: 2100, W_Abnormal_2: 880,  W_Event_1: 92,  Consecutive_Days: 3, Peak_Day_Flag: true })
-const blackW4 = week('2026-05-25', '第22周', { W_Total: 2250, W_Abnormal_2: 720,  W_Event_1: 75,  Consecutive_Days: 2, Peak_Day_Flag: true })
-
-// ============================================================
-// 完整学生风险画像数据
+// 完整学生风险画像
 // ============================================================
 
 export const STUDENT_PROFILES: StudentRiskProfile[] = [
-  // ---- 绿色稳定 ----
-  profile(101, 'green', null, [greenW2, greenW3, greenW4, greenW1]),
-  profile(102, 'green', null, [greenW2, greenW3, greenW4, greenW1], { B_Ratio: 8, B_Event_Rate: 5 }),
-  profile(105, 'green', null, [greenW2, greenW3, greenW4, greenW1], { B_Ratio: 10, B_Event_Rate: 6 }),
-  profile(106, 'green', null, [greenW2, greenW3, greenW4, greenW1], { B_Ratio: 7, B_Event_Rate: 4 }),
-  profile(203, 'green', null, [greenW2, greenW3, greenW4, greenW1], { B_Ratio: 9, B_Event_Rate: 5 }),
-  profile(205, 'green', null, [greenW2, greenW3, greenW4, greenW1], { B_Ratio: 11, B_Event_Rate: 7 }),
-
-  // ---- 绿色-黄色走向 ----
-  profile(107, 'green_yellow_trend', 'yellow', [greenW2, greenW3, trendYW2, trendYW1],
-    { B_Ratio: 11, B_Event_Rate: 8 }, [], 'maintained'),
-  profile(206, 'green_yellow_trend', 'yellow', [greenW2, greenW3, trendYW2, trendYW1],
-    { B_Ratio: 10, B_Event_Rate: 7 }),
-
-  // ---- 黄色 ----
-  profile(104, 'yellow', null, [greenW3, greenW4, yellowW2, yellowW1],
-    { B_Ratio: 13, B_Event_Rate: 9 }, [
-    { id: 1, date: '2026-06-12', type: 'communication', content: '与家长电话沟通，建议增加户外活动时间', author: '王老师', authorRole: 'teacher' },
-    { id: 2, date: '2026-06-14', type: 'observation', content: '课堂注意力有所改善，但课间仍显孤僻', author: '王老师', authorRole: 'teacher' },
+  // ======= 初一年级 详细风险数据 =======
+  // 初一(1)班
+  profile( findId('初一(1)班', 0), 'green', null, [gW(2380,165,18), gW(2520,145,15), gW(2400,155,20), gW(2450,180,22)], { B_Ratio: 8, B_Event_Rate: 5 }),
+  profile( findId('初一(1)班', 1), 'green', null, [gW(2400,150,16), gW(2480,140,14), gW(2380,148,18), gW(2420,175,20)], { B_Ratio: 7, B_Event_Rate: 4 }),
+  profile( findId('初一(1)班', 2), 'green', null, [gW(2350,160,20), gW(2450,155,17), gW(2500,160,19), gW(2400,170,21)], { B_Ratio: 10, B_Event_Rate: 6 }),
+  profile( findId('初一(1)班', 3), 'yellow', null, [gW(2400,380,42), gW(2300,420,48), gW(2350,480,50), gW(2280,520,55)], { B_Ratio: 13, B_Event_Rate: 9 }, [
+    { id: 1, date: '2026-06-12', type: 'communication', content: '与家长电话沟通，建议增加户外活动时间', author: '王建国', authorRole: 'teacher' },
   ]),
-  profile(202, 'yellow', null, [greenW2, greenW3, yellowW2, yellowW1],
-    { B_Ratio: 12, B_Event_Rate: 8 }),
-  profile(207, 'yellow', null, [greenW2, greenW3, yellowW2, yellowW1],
-    { B_Ratio: 14, B_Event_Rate: 10 }),
-
-  // ---- 黄色-红色走向 ----
-  profile(103, 'yellow_red_trend', 'red', [greenW4, trendRW3, trendRW2, trendRW1],
-    { B_Ratio: 15, B_Event_Rate: 10 }, [
-    { id: 3, date: '2026-06-10', type: 'observation', content: '连续多日课间独坐，不参与同学交流', author: '王老师', authorRole: 'teacher' },
-    { id: 4, date: '2026-06-13', type: 'communication', content: '家长反馈近期不愿谈论学校生活', author: '王老师', authorRole: 'teacher' },
-    { id: 5, date: '2026-06-15', type: 'activity', content: '安排参加学校心理社团活动', author: '李老师', authorRole: 'counselor' },
-  ], 'worsened'),
-
-  // ---- 红色 ----
-  profile(108, 'red', null, [redW4, redW3, redW2, redW1],
-    { B_Ratio: 18, B_Event_Rate: 12 }, [
-    { id: 6, date: '2026-06-08', type: 'observation', content: '上课频繁走神，作业完成率明显下降', author: '王老师', authorRole: 'teacher' },
-    { id: 7, date: '2026-06-11', type: 'communication', content: '与家长面谈，建议关注孩子情绪变化', author: '王老师', authorRole: 'teacher' },
-    { id: 8, date: '2026-06-14', type: 'referral', content: '转介心理老师进行初步评估', author: '李老师', authorRole: 'counselor' },
+  profile( findId('初一(1)班', 4), 'yellow_red_trend', 'red', [gW(2380,500,52), gW(2300,650,65), gW(2250,820,80), gW(2100,950,95)], { B_Ratio: 15, B_Event_Rate: 10 }, [
+    { id: 3, date: '2026-06-10', type: 'observation', content: '连续多日课间独坐，不参与同学交流', author: '王建国', authorRole: 'teacher' },
+    { id: 4, date: '2026-06-15', type: 'activity', content: '安排参加学校心理社团活动', author: '李心怡', authorRole: 'counselor' },
   ]),
-  profile(204, 'red', null, [redW4, redW3, redW2, redW1],
-    { B_Ratio: 16, B_Event_Rate: 11 }, [
-    { id: 9, date: '2026-06-09', type: 'communication', content: '家长反映学业压力大，睡眠质量下降', author: '陈老师', authorRole: 'teacher' },
+  profile( findId('初一(1)班', 5), 'green_yellow_trend', 'yellow', [gW(2400,200,22), gW(2450,250,28), gW(2350,280,30), gW(2350,410,42)], { B_Ratio: 11, B_Event_Rate: 8 }),
+  profile( findId('初一(1)班', 6), 'red', null, [gW(2380,500,52), gW(2300,650,65), gW(2150,820,80), gW(2100,950,95)], { B_Ratio: 18, B_Event_Rate: 12 }, [
+    { id: 6, date: '2026-06-08', type: 'observation', content: '上课频繁走神，作业完成率明显下降', author: '王建国', authorRole: 'teacher' },
+    { id: 8, date: '2026-06-14', type: 'referral', content: '转介心理老师进行初步评估', author: '李心怡', authorRole: 'counselor' },
   ]),
+  profile( findId('初一(1)班', 7), 'green', null, [gW(2400,145,14), gW(2450,160,18), gW(2500,150,16), gW(2380,165,17)]),
 
-  // ---- 黑色 ----
-  profile(208, 'black', null, [blackW4, blackW3, blackW2, blackW1],
-    { B_Ratio: 20, B_Event_Rate: 15 }, [
-    { id: 10, date: '2026-06-07', type: 'observation', content: '连续5天异常日，课堂完全脱离状态', author: '陈老师', authorRole: 'teacher' },
-    { id: 11, date: '2026-06-10', type: 'communication', content: '紧急约谈家长，建议立即进行专业评估', author: '陈老师', authorRole: 'teacher' },
-    { id: 12, date: '2026-06-12', type: 'referral', content: '转介至合作心理咨询机构进行深度评估', author: '李老师', authorRole: 'counselor' },
-    { id: 13, date: '2026-06-16', type: 'referral', content: '建议转介至儿童专科医院进一步诊断', author: '李老师', authorRole: 'counselor' },
+  // 初一(2)班
+  profile( findId('初一(2)班', 0), 'green', null, [gW(2420,160,18), gW(2480,150,16), gW(2400,158,19), gW(2450,175,21)]),
+  profile( findId('初一(2)班', 1), 'yellow', null, [gW(2380,350,38), gW(2400,420,45), gW(2320,480,50), gW(2250,520,55)], { B_Ratio: 12, B_Event_Rate: 8 }),
+  profile( findId('初一(2)班', 2), 'green_yellow_trend', 'yellow', [gW(2400,190,20), gW(2420,230,26), gW(2380,270,30), gW(2360,400,40)]),
+  profile( findId('初一(2)班', 3), 'green', null, [gW(2450,150,15), gW(2500,145,14), gW(2420,155,18), gW(2480,170,20)]),
+  profile( findId('初一(2)班', 4), 'red', null, [gW(2400,480,50), gW(2350,620,62), gW(2200,800,78), gW(2150,920,92)], { B_Ratio: 16, B_Event_Rate: 11 }, [
+    { id: 9, date: '2026-06-09', type: 'communication', content: '家长反映学业压力大，睡眠质量下降', author: '陈美玲', authorRole: 'teacher' },
   ]),
+  profile( findId('初一(2)班', 5), 'yellow', null, [gW(2400,320,35), gW(2380,400,42), gW(2350,460,48), gW(2300,500,52)]),
+  profile( findId('初一(2)班', 6), 'black', null, [gW(2250,720,75), gW(2100,880,92), gW(2050,1050,115), gW(2000,1120,120)], { B_Ratio: 20, B_Event_Rate: 15 }, [
+    { id: 10, date: '2026-06-07', type: 'observation', content: '连续5天异常日，课堂完全脱离状态', author: '陈美玲', authorRole: 'teacher' },
+    { id: 11, date: '2026-06-12', type: 'referral', content: '转介至合作心理咨询机构进行深度评估', author: '李心怡', authorRole: 'counselor' },
+  ]),
+  // 初一(2)班 第7个学生用绿色填充
+  ...Array.from({ length: 1 }, (_, i) => greenProfile(findId('初一(2)班', 7 + i))),
+
+  // ======= 其他班级：自动生成绿色学生 =======
+  ...STUDENTS.filter(s =>
+    !['初一(1)班', '初一(2)班'].includes(s.className)
+  ).map((s, i) => greenProfile(s.id, 7 + (i % 5))),
 ]
 
+// ---- 辅助：按班级顺序找学生ID ----
+function findId(className: string, nth: number): number {
+  const ids = STUDENTS.filter(s => s.className === className).map(s => s.id)
+  return ids[nth] ?? ids[ids.length - 1]
+}
+
 // ============================================================
-// 班级风险分布
+// 班级风险分布（自动计算）
 // ============================================================
 
-export const CLASS_DISTRIBUTIONS: ClassRiskDistribution[] = [
-  { className: '初一(1)班', totalStudents: 8, green: 3, greenYellowTrend: 1, yellow: 2, yellowRedTrend: 1, red: 1, black: 0 },
-  { className: '初一(2)班', totalStudents: 8, green: 2, greenYellowTrend: 1, yellow: 1, yellowRedTrend: 0, red: 1, black: 1 },
-]
+function calcDistribution(className: string): ClassRiskDistribution {
+  const profiles = STUDENT_PROFILES.filter(p => p.student.className === className)
+  const count = (level: string) => profiles.filter(p => p.currentLevel === level || p.trend === level).length
+  return {
+    className,
+    totalStudents: profiles.length,
+    green: profiles.filter(p => p.currentLevel === 'green' && !p.trend).length,
+    greenYellowTrend: count('green_yellow_trend'),
+    yellow: profiles.filter(p => p.currentLevel === 'yellow' && p.trend !== 'red').length,
+    yellowRedTrend: profiles.filter(p => p.currentLevel === 'yellow_red_trend' || p.trend === 'red').length,
+    red: profiles.filter(p => p.currentLevel === 'red').length,
+    black: profiles.filter(p => p.currentLevel === 'black').length,
+  }
+}
+
+export const CLASS_DISTRIBUTIONS: ClassRiskDistribution[] = CLASS_INFO.map(c => calcDistribution(c.name))
 
 // ============================================================
 // 预警通知
@@ -196,42 +245,42 @@ export const CLASS_DISTRIBUTIONS: ClassRiskDistribution[] = [
 
 export const ALERTS: AlertItem[] = [
   {
-    id: 1, studentId: 208, studentName: '罗天佑', className: '初一(2)班',
+    id: 1, studentId: findId('初一(2)班', 6), studentName: STUDENTS.find(s => s.id === findId('初一(2)班', 6))?.name ?? '', className: '初一(2)班',
     level: 'black',
     description: '连续5天异常日，W_Ratio=56%，异常状态已在一周内成为主导状态',
     suggestedAction: '立即进入高风险预警流程，建议家长带往专业机构进行心理评估',
     detectedAt: '2026-06-15',
   },
   {
-    id: 2, studentId: 108, studentName: '周昊然', className: '初一(1)班',
+    id: 2, studentId: findId('初一(1)班', 6), studentName: STUDENTS.find(s => s.id === findId('初一(1)班', 6))?.name ?? '', className: '初一(1)班',
     level: 'red',
     description: 'W_Ratio=45.2%，连续3天异常日，较上周继续上升',
     suggestedAction: '启动高强度第二阶段验证，通知家长，准备专业转介资源',
     detectedAt: '2026-06-15',
   },
   {
-    id: 3, studentId: 204, studentName: '黄俊杰', className: '初一(2)班',
+    id: 3, studentId: findId('初一(2)班', 4), studentName: STUDENTS.find(s => s.id === findId('初一(2)班', 4))?.name ?? '', className: '初一(2)班',
     level: 'red',
-    description: 'W_Ratio=38.1%，连续3天异常日，需重点关注',
+    description: 'W_Ratio=42.8%，异常占比持续升高，需重点关注',
     suggestedAction: '家长需收到明确提示，学校心理老师介入判断',
     detectedAt: '2026-06-15',
   },
   {
-    id: 4, studentId: 103, studentName: '王雨桐', className: '初一(1)班',
+    id: 4, studentId: findId('初一(1)班', 4), studentName: STUDENTS.find(s => s.id === findId('初一(1)班', 4))?.name ?? '', className: '初一(1)班',
     level: 'yellow_red_trend',
     description: '本周W_Ratio=35.8%，较个体基线上升12个百分点，呈持续上升趋势',
     suggestedAction: '比黄色阶段更密集地观察，建立周反馈机制',
     detectedAt: '2026-06-15',
   },
   {
-    id: 5, studentId: 104, studentName: '赵子轩', className: '初一(1)班',
+    id: 5, studentId: findId('初一(1)班', 3), studentName: STUDENTS.find(s => s.id === findId('初一(1)班', 3))?.name ?? '', className: '初一(1)班',
     level: 'yellow',
     description: 'W_Ratio=22.8%，连续2天异常日，轻度但持续波动',
     suggestedAction: '建议家长陪孩子进行轻量活动释放，心理老师同步观察',
     detectedAt: '2026-06-15',
   },
   {
-    id: 6, studentId: 107, studentName: '孙雅琪', className: '初一(1)班',
+    id: 6, studentId: findId('初一(1)班', 5), studentName: STUDENTS.find(s => s.id === findId('初一(1)班', 5))?.name ?? '', className: '初一(1)班',
     level: 'green_yellow_trend',
     description: '本周W_Ratio=17.4%，略高于个体基线，存在轻微上升趋势',
     suggestedAction: '家长增加陪伴与观察，注意作息和社交变化',
@@ -243,22 +292,30 @@ export const ALERTS: AlertItem[] = [
 // 全校汇总统计
 // ============================================================
 
+const sd = () => {
+  const r: Record<string, number> = { green: 0, greenYellowTrend: 0, yellow: 0, yellowRedTrend: 0, red: 0, black: 0 }
+  STUDENT_PROFILES.forEach(p => {
+    const lv = p.currentLevel
+    if (lv === 'green' && !p.trend) r.green++
+    else if (lv === 'green_yellow_trend' || (lv === 'green' && p.trend)) r.greenYellowTrend++
+    else if (lv === 'yellow' && p.trend !== 'red' && p.currentLevel !== 'yellow_red_trend') r.yellow++
+    else if (lv === 'yellow_red_trend' || p.trend === 'red') r.yellowRedTrend++
+    else if (lv === 'red') r.red++
+    else if (lv === 'black') r.black++
+    else r.green++
+  })
+  return r
+}
+
 export const SCHOOL_STATS = {
-  totalStudents: 16,
+  totalStudents: STUDENTS.length,
   currentWeekLabels: ['第22周', '第23周', '第24周', '第25周'],
-  schoolRiskDistribution: {
-    green: 6,
-    greenYellowTrend: 2,
-    yellow: 3,
-    yellowRedTrend: 1,
-    red: 2,
-    black: 1,
-  },
-  weeklyGlobalRatios: [12.5, 14.8, 16.2, 18.5], // 全校周异常占比趋势
+  schoolRiskDistribution: sd(),
+  weeklyGlobalRatios: [12.5, 14.8, 16.2, 18.5],
 }
 
 // ============================================================
-// 家长数据映射（家长只看自己孩子）
+// 家长映射
 // ============================================================
 
 export const PARENT_CHILDREN: Record<string, number[]> = {
@@ -267,14 +324,21 @@ export const PARENT_CHILDREN: Record<string, number[]> = {
 }
 
 // ============================================================
-// IPC 摄像头数据
+// IPC 摄像头
 // ============================================================
 
 export const CAMERAS: Camera[] = [
-  { id: 1, name: '初一(1)班 讲台主摄', classroom: '初一(1)班', ip: '192.168.1.101', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 12450, todayFaces: 285 },
-  { id: 2, name: '初一(2)班 讲台主摄', classroom: '初一(2)班', ip: '192.168.1.102', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 13100, todayFaces: 302 },
-  { id: 3, name: '食堂入口',           classroom: '',           ip: '192.168.1.201', status: 'standby', scene: 'canteen',   resolution: '2560×1440', fps: 10, lastSeen: '2026-06-25T17:20:00', todayDetections: 0,     todayFaces: 0 },
-  { id: 4, name: '学校大门',           classroom: '',           ip: '192.168.1.202', status: 'standby', scene: 'gate',      resolution: '2560×1440', fps: 15, lastSeen: '2026-06-25T17:20:00', todayDetections: 0,     todayFaces: 0 },
+  { id: 1,  name: '初一(1)班 讲台主摄', classroom: '初一(1)班', ip: '192.168.1.101', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 12450, todayFaces: 285 },
+  { id: 2,  name: '初一(2)班 讲台主摄', classroom: '初一(2)班', ip: '192.168.1.102', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 13100, todayFaces: 302 },
+  { id: 3,  name: '初一(3)班 讲台主摄', classroom: '初一(3)班', ip: '192.168.1.103', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:27:55', todayDetections: 11800, todayFaces: 268 },
+  { id: 4,  name: '初一(4)班 讲台主摄', classroom: '初一(4)班', ip: '192.168.1.104', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:27:50', todayDetections: 10500, todayFaces: 240 },
+  { id: 5,  name: '初二(1)班 讲台主摄', classroom: '初二(1)班', ip: '192.168.2.101', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 11200, todayFaces: 255 },
+  { id: 6,  name: '初二(2)班 讲台主摄', classroom: '初二(2)班', ip: '192.168.2.102', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:27:58', todayDetections: 10800, todayFaces: 248 },
+  { id: 7,  name: '初二(3)班 讲台主摄', classroom: '初二(3)班', ip: '192.168.2.103', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:27:56', todayDetections: 11500, todayFaces: 262 },
+  { id: 8,  name: '初三(1)班 讲台主摄', classroom: '初三(1)班', ip: '192.168.3.101', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 9800,  todayFaces: 220 },
+  { id: 9,  name: '初三(2)班 讲台主摄', classroom: '初三(2)班', ip: '192.168.3.102', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:27:52', todayDetections: 10200, todayFaces: 235 },
+  { id: 10, name: '食堂入口',           classroom: '',           ip: '192.168.5.201', status: 'standby', scene: 'canteen',   resolution: '2560×1440', fps: 10, lastSeen: '2026-06-25T17:20:00', todayDetections: 0, todayFaces: 0 },
+  { id: 11, name: '学校大门',           classroom: '',           ip: '192.168.5.202', status: 'standby', scene: 'gate',      resolution: '2560×1440', fps: 15, lastSeen: '2026-06-25T17:20:00', todayDetections: 0, todayFaces: 0 },
 ]
 
 // ============================================================
@@ -292,7 +356,7 @@ export const PIPELINE_STAGES: AIPipelineStage[] = [
 ]
 
 // ============================================================
-// 实时检测日志（最近10条）
+// 实时检测日志
 // ============================================================
 
 function randomEmotions(base: 'good' | 'neutral' | 'abnormal'): EmotionScores {
@@ -301,66 +365,57 @@ function randomEmotions(base: 'good' | 'neutral' | 'abnormal'): EmotionScores {
   return { happy: 0.10, neutral: 0.55, surprise: 0.12, sad: 0.08, angry: 0.05, disgust: 0.04, fear: 0.06 }
 }
 
-const STUDENT_MAP: Record<number, { name: string; class: string }> = {
-  101: { name: '张明悦', class: '初一(1)班' },
-  102: { name: '李思远', class: '初一(1)班' },
-  103: { name: '王雨桐', class: '初一(1)班' },
-  104: { name: '赵子轩', class: '初一(1)班' },
-  105: { name: '陈欣然', class: '初一(1)班' },
-  106: { name: '刘一鸣', class: '初一(1)班' },
-  107: { name: '孙雅琪', class: '初一(1)班' },
-  108: { name: '周昊然', class: '初一(1)班' },
-  201: { name: '吴梓涵', class: '初一(2)班' },
-  202: { name: '郑子皓', class: '初一(2)班' },
-  203: { name: '林雨萱', class: '初一(2)班' },
-  204: { name: '黄俊杰', class: '初一(2)班' },
-  205: { name: '徐若曦', class: '初一(2)班' },
-  206: { name: '何子涵', class: '初一(2)班' },
-  207: { name: '杨思琪', class: '初一(2)班' },
-  208: { name: '罗天佑', class: '初一(2)班' },
+function logStudent(className: string): { studentId: number | null; name: string | null } {
+  const ids = STUDENTS.filter(s => s.className === className).map(s => s.id)
+  const id = ids[Math.floor(Math.random() * ids.length)]
+  return { studentId: id, name: STUDENTS.find(s => s.id === id)?.name ?? null }
 }
 
-const SAMPLE_EVENTS: Array<{ studentId: number | null; base: 'good' | 'neutral' | 'abnormal'; sys: 1 | 2 }> = [
-  { studentId: 101, base: 'good', sys: 2 },
-  { studentId: 102, base: 'good', sys: 2 },
-  { studentId: 105, base: 'neutral', sys: 2 },
-  { studentId: 103, base: 'abnormal', sys: 2 },
-  { studentId: 107, base: 'neutral', sys: 1 },
-  { studentId: null, base: 'neutral', sys: 1 },
-  { studentId: 104, base: 'neutral', sys: 2 },
-  { studentId: 108, base: 'abnormal', sys: 2 },
-  { studentId: 204, base: 'abnormal', sys: 2 },
-  { studentId: 206, base: 'good', sys: 2 },
-  { studentId: 208, base: 'abnormal', sys: 2 },
-  { studentId: 105, base: 'good', sys: 2 },
-  { studentId: 103, base: 'abnormal', sys: 1 },
-  { studentId: 202, base: 'neutral', sys: 2 },
-  { studentId: 107, base: 'neutral', sys: 2 },
-  { studentId: null, base: 'neutral', sys: 1 },
-  { studentId: 101, base: 'good', sys: 2 },
-  { studentId: 108, base: 'abnormal', sys: 2 },
+const SAMPLE_BASES: Array<{ key: string; base: 'good' | 'neutral' | 'abnormal'; sys: 1 | 2 }> = [
+  { key: '初一(1)班', base: 'good', sys: 2 },
+  { key: '初一(1)班', base: 'neutral', sys: 2 },
+  { key: '初一(2)班', base: 'abnormal', sys: 2 },
+  { key: '初一(1)班', base: 'neutral', sys: 1 },
+  { key: '初一(2)班', base: 'good', sys: 2 },
+  { key: '初一(2)班', base: 'abnormal', sys: 2 },
+  { key: '初一(1)班', base: 'abnormal', sys: 1 },
+  { key: '初一(3)班', base: 'neutral', sys: 2 },
+  { key: '初一(3)班', base: 'good', sys: 2 },
+  { key: '初二(1)班', base: 'neutral', sys: 2 },
+  { key: '初二(1)班', base: 'good', sys: 2 },
+  { key: '初一(1)班', base: 'abnormal', sys: 2 },
+  { key: '初一(2)班', base: 'neutral', sys: 1 },
+  { key: '初二(2)班', base: 'neutral', sys: 2 },
+  { key: '初一(1)班', base: 'good', sys: 2 },
+  { key: '初一(2)班', base: 'abnormal', sys: 2 },
 ]
 
-export const DETECTION_LOG: DetectionEvent[] = SAMPLE_EVENTS.map((e, i) => {
-  const ts = `2026-06-25T17:${String(20 + Math.floor(i / 3) * 2).padStart(2, '0')}:${String(10 + (i % 3) * 15).padStart(2, '0')}`
-  const emotions = randomEmotions(e.base)
+const CLASS_CAMERA: Record<string, number> = {
+  '初一(1)班': 1, '初一(2)班': 2, '初一(3)班': 3, '初一(4)班': 4,
+  '初二(1)班': 5, '初二(2)班': 6, '初二(3)班': 7,
+  '初三(1)班': 8, '初三(2)班': 9,
+}
+
+export const DETECTION_LOG: DetectionEvent[] = SAMPLE_BASES.map((b, i) => {
+  const l = logStudent(b.key)
+  const emotions = randomEmotions(b.base)
   const topState = emotions.happy >= 0.33 ? 'engaged' as const
     : emotions.surprise >= 0.18 ? 'confused' as const
     : (emotions.sad + emotions.angry + emotions.fear + emotions.disgust) >= 0.25 ? 'withdrawn' as const
-    : 'neutral' as unknown as 'engaged'
+    : 'engaged' as const
 
   return {
     id: 2000 + i,
-    timestamp: ts,
-    cameraId: e.studentId ? (e.studentId < 200 ? 1 : 2) : (i % 2 === 0 ? 1 : 2),
-    studentId: e.studentId,
-    studentName: e.studentId ? STUDENT_MAP[e.studentId]?.name ?? null : null,
+    timestamp: `2026-06-25T17:${String(20 + i * 2).padStart(2, '0')}:${String(10 + (i % 3) * 15).padStart(2, '0')}`,
+    cameraId: CLASS_CAMERA[b.key] ?? 1,
+    studentId: l.studentId,
+    studentName: l.name,
     confidence: 0.82 + Math.random() * 0.16,
     emotions,
     state: topState,
     faceBox: { x: 120 + i * 10, y: 80 + i * 5, w: 60, h: 75 },
     faceQuality: 0.7 + Math.random() * 0.25,
-    cameraSystem: e.sys,
+    cameraSystem: b.sys,
   }
 })
 
@@ -373,53 +428,43 @@ const EMOTION_KEYS: (keyof EmotionScores)[] = ['happy', 'neutral', 'surprise', '
 function genDaySamples(date: string, cameraId: number, total: number, abnormalRate: number): DailySample {
   const abnormal = Math.round(total * abnormalRate)
   const normal = total - abnormal
-  const engaged = Math.round(normal * 0.40)
-  const confused = Math.round(normal * 0.35)
-  const withdrawn = abnormal
-  const unknown = normal - engaged - confused
-
   const base: EmotionScores = { happy: 0, neutral: 0, surprise: 0, sad: 0, angry: 0, disgust: 0, fear: 0 }
-  for (const k of EMOTION_KEYS) {
-    base[k] = +(Math.random() * 0.2 + (k === 'neutral' ? 0.3 : 0.05)).toFixed(3)
-  }
+  for (const k of EMOTION_KEYS) base[k] = +(Math.random() * 0.2 + (k === 'neutral' ? 0.3 : 0.05)).toFixed(3)
   const sum = EMOTION_KEYS.reduce((s, k) => s + base[k], 0)
   for (const k of EMOTION_KEYS) base[k] = +(base[k] / sum).toFixed(4)
 
   return {
-    date,
-    cameraId,
+    date, cameraId,
     totalSamples: Math.round(total * 1.15),
     validSamples: total,
-    stateDistribution: { engaged, confused, withdrawn, unknown: Math.max(0, unknown) },
+    stateDistribution: {
+      engaged: Math.round(normal * 0.40),
+      confused: Math.round(normal * 0.35),
+      withdrawn: abnormal,
+      unknown: Math.max(0, normal - Math.round(normal * 0.40) - Math.round(normal * 0.35)),
+    },
     emotionDistribution: base,
     abnormalEvents: Math.round(abnormalRate * 12),
     peakHour: 9 + Math.floor(Math.random() * 7),
   }
 }
 
-export const DAILY_SAMPLES: DailySample[] = [
-  genDaySamples('2026-06-19', 1, 380, 0.10),
-  genDaySamples('2026-06-19', 3, 395, 0.08),
-  genDaySamples('2026-06-20', 1, 360, 0.12),
-  genDaySamples('2026-06-20', 3, 370, 0.15),
-  genDaySamples('2026-06-21', 1, 340, 0.09),
-  genDaySamples('2026-06-21', 3, 355, 0.11),
-  genDaySamples('2026-06-22', 1, 390, 0.14),
-  genDaySamples('2026-06-22', 3, 380, 0.18),
-  genDaySamples('2026-06-23', 1, 375, 0.16),
-  genDaySamples('2026-06-23', 3, 365, 0.20),
-  genDaySamples('2026-06-24', 1, 385, 0.18),
-  genDaySamples('2026-06-24', 3, 390, 0.22),
-  genDaySamples('2026-06-25', 1, 400, 0.17),
-  genDaySamples('2026-06-25', 3, 385, 0.21),
-]
+const ALL_CAMERA_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+export const DAILY_SAMPLES: DailySample[] = []
+const DATES = ['2026-06-19', '2026-06-20', '2026-06-21', '2026-06-22', '2026-06-23', '2026-06-24', '2026-06-25']
+for (const date of DATES) {
+  for (const cid of ALL_CAMERA_IDS) {
+    const rate = 0.08 + (cid % 5) * 0.02 + (DATES.indexOf(date) * 0.005)
+    DAILY_SAMPLES.push(genDaySamples(date, cid, 350 + (cid * 10) + Math.round(Math.random() * 80), rate))
+  }
+}
 
 // ============================================================
 // 系统汇总统计
 // ============================================================
 
 export const AI_SYSTEM_STATS = {
-  todayTotalDetections: DETECTION_LOG.reduce((s, e) => s + 1, 0) * 780,
+  todayTotalDetections: DETECTION_LOG.length * 780,
   todayRecognizedFaces: 285,
   avgConfidence: 0.91,
   p95Latency: 38,
@@ -430,35 +475,17 @@ export const AI_SYSTEM_STATS = {
 }
 
 // ============================================================
-// 年级班级树 + 人脸注册数据
+// 学生人脸注册数据
 // ============================================================
 
-export const GRADE_TREE: GradeClassNode[] = [
-  {
-    name: '初一年级',
-    classes: [
-      { name: '初一(1)班', total: 8, enrolled: 8 },
-      { name: '初一(2)班', total: 8, enrolled: 7 },
-    ],
-  },
-]
-
-/** 学生人脸注册状态 */
-export const FACE_ENROLLMENT: Record<number, { registered: boolean; quality: number; lastUpdated: string }> = {
-  101: { registered: true,  quality: 0.92, lastUpdated: '2026-06-20' },
-  102: { registered: true,  quality: 0.88, lastUpdated: '2026-06-20' },
-  103: { registered: true,  quality: 0.85, lastUpdated: '2026-06-15' },
-  104: { registered: true,  quality: 0.90, lastUpdated: '2026-06-18' },
-  105: { registered: true,  quality: 0.87, lastUpdated: '2026-06-20' },
-  106: { registered: true,  quality: 0.91, lastUpdated: '2026-06-22' },
-  107: { registered: true,  quality: 0.83, lastUpdated: '2026-06-15' },
-  108: { registered: true,  quality: 0.89, lastUpdated: '2026-06-18' },
-  201: { registered: true,  quality: 0.86, lastUpdated: '2026-06-20' },
-  202: { registered: true,  quality: 0.84, lastUpdated: '2026-06-15' },
-  203: { registered: true,  quality: 0.90, lastUpdated: '2026-06-22' },
-  204: { registered: true,  quality: 0.87, lastUpdated: '2026-06-18' },
-  205: { registered: true,  quality: 0.82, lastUpdated: '2026-06-15' },
-  206: { registered: true,  quality: 0.88, lastUpdated: '2026-06-20' },
-  207: { registered: false, quality: 0.00, lastUpdated: '' },
-  208: { registered: true,  quality: 0.85, lastUpdated: '2026-06-18' },
+export const FACE_ENROLLMENT: Record<number, { registered: boolean; quality: number; lastUpdated: string }> = {}
+for (const s of STUDENTS) {
+  const cls = GRADE_TREE.flatMap(g => g.classes).find(c => c.name === s.className)
+  const countForClass = STUDENTS.filter(ss => ss.className === s.className).indexOf(s)
+  const registered = cls ? countForClass < cls.enrolled : true
+  FACE_ENROLLMENT[s.id] = {
+    registered,
+    quality: registered ? 0.78 + Math.random() * 0.18 : 0,
+    lastUpdated: registered ? '2026-06-' + String(15 + (s.id % 10)).padStart(2, '0') : '',
+  }
 }

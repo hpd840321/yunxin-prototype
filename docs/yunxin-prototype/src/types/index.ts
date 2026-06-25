@@ -46,6 +46,16 @@ export interface Student {
   grade: string
 }
 
+/** 教师信息 */
+export interface Teacher {
+  id: number
+  name: string
+  role: 'head_teacher' | 'subject_teacher' | 'counselor' | 'school_manager'
+  grade: string
+  className?: string      // 班主任关联班级
+  subjects?: string[]     // 任课学科
+}
+
 /** 分类状态（3.3 数据分类） */
 export type SampleCategory = 'good' | 'neutral' | 'abnormal'
 
