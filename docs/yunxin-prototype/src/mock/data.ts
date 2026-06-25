@@ -1,6 +1,7 @@
 import type {
   Student, StudentRiskProfile, WeeklyMetrics, IndividualBaseline,
   ClassRiskDistribution, AlertItem, UserRole, RiskLevel, InterventionRecord,
+  Camera, DetectionEvent, AIPipelineStage, DailySample, EmotionScores,
 } from '@/types'
 
 // ============================================================
@@ -261,6 +262,172 @@ export const SCHOOL_STATS = {
 // ============================================================
 
 export const PARENT_CHILDREN: Record<string, number[]> = {
-  '张明悦家长': [101],      // 张明悦 - 绿色
-  '周昊然家长': [108],      // 周昊然 - 红色（高风险示例）
+  '张明悦家长': [101],
+  '周昊然家长': [108],
+}
+
+// ============================================================
+// IPC 摄像头数据
+// ============================================================
+
+export const CAMERAS: Camera[] = [
+  { id: 1,  name: 'A-101 教室主摄',   classroom: '初一(1)班', ip: '192.168.1.101', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 12450, todayFaces: 285 },
+  { id: 2,  name: 'A-101 教室侧摄',   classroom: '初一(1)班', ip: '192.168.1.102', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 11820, todayFaces: 270 },
+  { id: 3,  name: 'A-102 教室主摄',   classroom: '初一(2)班', ip: '192.168.1.103', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:27:58', todayDetections: 13100, todayFaces: 302 },
+  { id: 4,  name: 'A-102 教室侧摄',   classroom: '初一(2)班', ip: '192.168.1.104', status: 'degraded', scene: 'classroom', resolution: '1920×1080', fps: 15, lastSeen: '2026-06-25T17:25:00', todayDetections: 8920, todayFaces: 198 },
+  { id: 5,  name: 'B-201 走廊',       classroom: '',           ip: '192.168.1.201', status: 'online',  scene: 'corridor',  resolution: '1920×1080', fps: 15, lastSeen: '2026-06-25T17:28:00', todayDetections: 3200,  todayFaces: 0 },
+  { id: 6,  name: 'C-301 食堂入口',   classroom: '',           ip: '192.168.1.301', status: 'online',  scene: 'canteen',   resolution: '2560×1440', fps: 10, lastSeen: '2026-06-25T17:20:00', todayDetections: 0,     todayFaces: 0 },
+  { id: 7,  name: 'D-401 操场',       classroom: '',           ip: '192.168.1.401', status: 'offline', scene: 'playground', resolution: '2560×1440', fps: 20, lastSeen: '2026-06-25T12:00:00', todayDetections: 0,     todayFaces: 0 },
+]
+
+// ============================================================
+// AI 推理流水线
+// ============================================================
+
+export const PIPELINE_STAGES: AIPipelineStage[] = [
+  { key: 'capture',    label: '采集',       status: 'ok',       latency: 8,   processed: 12450 },
+  { key: 'preprocess', label: '预处理',     status: 'ok',       latency: 12,  processed: 12450 },
+  { key: 'detect',     label: '检测',       status: 'ok',       latency: 18,  processed: 12380 },
+  { key: 'emotion',    label: '情绪识别',   status: 'ok',       latency: 5,   processed: 12100 },
+  { key: 'map',        label: '状态映射',   status: 'ok',       latency: 1,   processed: 12100 },
+  { key: 'write',      label: '数据写入',   status: 'ok',       latency: 3,   processed: 12100 },
+  { key: 'insight',    label: '生成洞察',   status: 'degraded', latency: 45,  processed: 1850 },
+]
+
+// ============================================================
+// 实时检测日志（最近10条）
+// ============================================================
+
+function randomEmotions(base: 'good' | 'neutral' | 'abnormal'): EmotionScores {
+  if (base === 'good') return { happy: 0.45, neutral: 0.35, surprise: 0.08, sad: 0.04, angry: 0.03, disgust: 0.02, fear: 0.03 }
+  if (base === 'abnormal') return { happy: 0.05, neutral: 0.25, surprise: 0.08, sad: 0.30, angry: 0.15, disgust: 0.10, fear: 0.07 }
+  return { happy: 0.10, neutral: 0.55, surprise: 0.12, sad: 0.08, angry: 0.05, disgust: 0.04, fear: 0.06 }
+}
+
+const STUDENT_MAP: Record<number, { name: string; class: string }> = {
+  101: { name: '张明悦', class: '初一(1)班' },
+  102: { name: '李思远', class: '初一(1)班' },
+  103: { name: '王雨桐', class: '初一(1)班' },
+  104: { name: '赵子轩', class: '初一(1)班' },
+  105: { name: '陈欣然', class: '初一(1)班' },
+  106: { name: '刘一鸣', class: '初一(1)班' },
+  107: { name: '孙雅琪', class: '初一(1)班' },
+  108: { name: '周昊然', class: '初一(1)班' },
+  201: { name: '吴梓涵', class: '初一(2)班' },
+  202: { name: '郑子皓', class: '初一(2)班' },
+  203: { name: '林雨萱', class: '初一(2)班' },
+  204: { name: '黄俊杰', class: '初一(2)班' },
+  205: { name: '徐若曦', class: '初一(2)班' },
+  206: { name: '何子涵', class: '初一(2)班' },
+  207: { name: '杨思琪', class: '初一(2)班' },
+  208: { name: '罗天佑', class: '初一(2)班' },
+}
+
+const SAMPLE_EVENTS: Array<{ studentId: number | null; base: 'good' | 'neutral' | 'abnormal'; sys: 1 | 2 }> = [
+  { studentId: 101, base: 'good', sys: 2 },
+  { studentId: 102, base: 'good', sys: 2 },
+  { studentId: 105, base: 'neutral', sys: 2 },
+  { studentId: 103, base: 'abnormal', sys: 2 },
+  { studentId: 107, base: 'neutral', sys: 1 },
+  { studentId: null, base: 'neutral', sys: 1 },
+  { studentId: 104, base: 'neutral', sys: 2 },
+  { studentId: 108, base: 'abnormal', sys: 2 },
+  { studentId: 204, base: 'abnormal', sys: 2 },
+  { studentId: 206, base: 'good', sys: 2 },
+  { studentId: 208, base: 'abnormal', sys: 2 },
+  { studentId: 105, base: 'good', sys: 2 },
+  { studentId: 103, base: 'abnormal', sys: 1 },
+  { studentId: 202, base: 'neutral', sys: 2 },
+  { studentId: 107, base: 'neutral', sys: 2 },
+  { studentId: null, base: 'neutral', sys: 1 },
+  { studentId: 101, base: 'good', sys: 2 },
+  { studentId: 108, base: 'abnormal', sys: 2 },
+]
+
+export const DETECTION_LOG: DetectionEvent[] = SAMPLE_EVENTS.map((e, i) => {
+  const ts = `2026-06-25T17:${String(20 + Math.floor(i / 3) * 2).padStart(2, '0')}:${String(10 + (i % 3) * 15).padStart(2, '0')}`
+  const emotions = randomEmotions(e.base)
+  const topState = emotions.happy >= 0.33 ? 'engaged' as const
+    : emotions.surprise >= 0.18 ? 'confused' as const
+    : (emotions.sad + emotions.angry + emotions.fear + emotions.disgust) >= 0.25 ? 'withdrawn' as const
+    : 'neutral' as unknown as 'engaged'
+
+  return {
+    id: 2000 + i,
+    timestamp: ts,
+    cameraId: [1, 2, 3, 4][i % 4],
+    studentId: e.studentId,
+    studentName: e.studentId ? STUDENT_MAP[e.studentId]?.name ?? null : null,
+    confidence: 0.82 + Math.random() * 0.16,
+    emotions,
+    state: topState,
+    faceBox: { x: 120 + i * 10, y: 80 + i * 5, w: 60, h: 75 },
+    faceQuality: 0.7 + Math.random() * 0.25,
+    cameraSystem: e.sys,
+  }
+})
+
+// ============================================================
+// 日采样数据
+// ============================================================
+
+const EMOTION_KEYS: (keyof EmotionScores)[] = ['happy', 'neutral', 'surprise', 'sad', 'angry', 'disgust', 'fear']
+
+function genDaySamples(date: string, cameraId: number, total: number, abnormalRate: number): DailySample {
+  const abnormal = Math.round(total * abnormalRate)
+  const normal = total - abnormal
+  const engaged = Math.round(normal * 0.40)
+  const confused = Math.round(normal * 0.35)
+  const withdrawn = abnormal
+  const unknown = normal - engaged - confused
+
+  const base: EmotionScores = { happy: 0, neutral: 0, surprise: 0, sad: 0, angry: 0, disgust: 0, fear: 0 }
+  for (const k of EMOTION_KEYS) {
+    base[k] = +(Math.random() * 0.2 + (k === 'neutral' ? 0.3 : 0.05)).toFixed(3)
+  }
+  const sum = EMOTION_KEYS.reduce((s, k) => s + base[k], 0)
+  for (const k of EMOTION_KEYS) base[k] = +(base[k] / sum).toFixed(4)
+
+  return {
+    date,
+    cameraId,
+    totalSamples: Math.round(total * 1.15),
+    validSamples: total,
+    stateDistribution: { engaged, confused, withdrawn, unknown: Math.max(0, unknown) },
+    emotionDistribution: base,
+    abnormalEvents: Math.round(abnormalRate * 12),
+    peakHour: 9 + Math.floor(Math.random() * 7),
+  }
+}
+
+export const DAILY_SAMPLES: DailySample[] = [
+  genDaySamples('2026-06-19', 1, 380, 0.10),
+  genDaySamples('2026-06-19', 3, 395, 0.08),
+  genDaySamples('2026-06-20', 1, 360, 0.12),
+  genDaySamples('2026-06-20', 3, 370, 0.15),
+  genDaySamples('2026-06-21', 1, 340, 0.09),
+  genDaySamples('2026-06-21', 3, 355, 0.11),
+  genDaySamples('2026-06-22', 1, 390, 0.14),
+  genDaySamples('2026-06-22', 3, 380, 0.18),
+  genDaySamples('2026-06-23', 1, 375, 0.16),
+  genDaySamples('2026-06-23', 3, 365, 0.20),
+  genDaySamples('2026-06-24', 1, 385, 0.18),
+  genDaySamples('2026-06-24', 3, 390, 0.22),
+  genDaySamples('2026-06-25', 1, 400, 0.17),
+  genDaySamples('2026-06-25', 3, 385, 0.21),
+]
+
+// ============================================================
+// 系统汇总统计
+// ============================================================
+
+export const AI_SYSTEM_STATS = {
+  todayTotalDetections: DETECTION_LOG.reduce((s, e) => s + 1, 0) * 780,   // ~14000
+  todayRecognizedFaces: 285,
+  avgConfidence: 0.91,
+  p95Latency: 38,
+  queueDepth: 127,
+  pipelineUptime: 99.8,
+  system1EventCount: 86,
+  system2SampleCount: 2450,
 }

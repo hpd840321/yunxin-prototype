@@ -121,3 +121,108 @@ export interface AlertItem {
   suggestedAction: string
   detectedAt: string
 }
+
+// ============================================================
+// 摄像头与 AI 推理数据
+// ============================================================
+
+/** IPC 摄像头信息 */
+export interface Camera {
+  id: number
+  name: string
+  classroom: string
+  ip: string
+  status: 'online' | 'offline' | 'fault'
+  scene: 'classroom' | 'corridor' | 'lab' | 'canteen' | 'playground' | 'library' | 'gate'
+  resolution: string
+  fps: number
+  lastSeen: string              // ISO date
+  todayDetections: number
+  todayFaces: number
+}
+
+/** 场景分析模式（6.3 场景化隐私分级） */
+export const SCENE_LABELS: Record<string, string> = {
+  classroom: '教室',
+  corridor: '走廊',
+  lab: '实验室',
+  canteen: '食堂',
+  playground: '操场',
+  library: '图书馆',
+  gate: '校门',
+}
+
+/** AI 推理流水线阶段 */
+export interface AIPipelineStage {
+  key: string
+  label: string
+  status: 'ok' | 'degraded' | 'fault' | 'idle'
+  latency: number                // ms
+  processed: number
+}
+
+/** 单次检测事件 */
+export interface DetectionEvent {
+  id: number
+  timestamp: string
+  cameraId: number
+  studentId: number | null      // null = 未识别
+  studentName: string | null
+  confidence: number            // 0-1
+  emotions: EmotionScores
+  state: LearningState
+  faceBox: { x: number; y: number; w: number; h: number }
+  faceQuality: number           // 0-1
+  cameraSystem: 1 | 2           // 系统1（实时）或系统2（延迟分析）
+}
+
+/** 七类情绪概率 */
+export interface EmotionScores {
+  happy: number
+  neutral: number
+  surprise: number
+  sad: number
+  angry: number
+  disgust: number
+  fear: number
+}
+
+/** 学习三态（明眸映射结果） */
+export type LearningState = 'engaged' | 'confused' | 'withdrawn' | 'unknown'
+
+export const STATE_LABELS: Record<LearningState, string> = {
+  engaged: '投入积极',
+  confused: '困惑思考',
+  withdrawn: '疲惫退缩',
+  unknown: '未识别',
+}
+
+export const STATE_COLORS: Record<LearningState, string> = {
+  engaged: '#F2C94C',
+  confused: '#9B9ECE',
+  withdrawn: '#BDBDBD',
+  unknown: 'transparent',
+}
+
+/** 日采样汇总 */
+export interface DailySample {
+  date: string
+  cameraId: number
+  totalSamples: number
+  validSamples: number
+  stateDistribution: { engaged: number; confused: number; withdrawn: number; unknown: number }
+  emotionDistribution: EmotionScores
+  abnormalEvents: number
+  peakHour: number              // 异常峰值时段（0-23）
+}
+
+/** 七类情绪原始标签与颜色 */
+export const RAW_EMOTIONS = [
+  { key: 'happy',    label: '快乐',    color: '#F4B942' },
+  { key: 'neutral',  label: '中性',    color: '#9BAFBC' },
+  { key: 'surprise', label: '惊讶',    color: '#9B9ECE' },
+  { key: 'sad',      label: '悲伤',    color: '#6B8CAE' },
+  { key: 'angry',    label: '愤怒',    color: '#E07C7C' },
+  { key: 'disgust',  label: '厌恶',    color: '#8DAF8D' },
+  { key: 'fear',     label: '恐惧',    color: '#C9A0B8' },
+]
