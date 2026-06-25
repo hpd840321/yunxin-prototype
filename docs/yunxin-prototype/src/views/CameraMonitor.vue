@@ -7,8 +7,8 @@
       </div>
       <div class="top-stats">
         <span class="stat-chip online">{{ onlineCount }} 在线</span>
+        <span class="stat-chip standby">{{ standbyCount }} 待接入</span>
         <span class="stat-chip offline">{{ offlineCount }} 离线</span>
-        <span class="stat-chip fault">{{ faultCount }} 故障</span>
       </div>
     </header>
 
@@ -33,11 +33,9 @@
               <span class="mock-label">王雨桐 疲惫退缩</span>
             </div>
           </div>
-          <div v-if="cam.status === 'degraded'" class="cam-degraded-msg">
-            帧率下降 (15fps) · 部分帧跳过
-          </div>
-          <div v-if="cam.status === 'offline'" class="cam-offline-msg">
-            设备离线
+          <div v-if="cam.status === 'standby'" class="cam-msg standby">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M12 3v6l3-3-3-3z"/></svg>
+            <span>待接入 · 点位预留</span>
           </div>
         </div>
 
@@ -141,8 +139,8 @@ const showEmotions = ref(false)
 
 const cameras = computed(() => CAMERAS)
 const onlineCount = computed(() => CAMERAS.filter(c => c.status === 'online').length)
+const standbyCount = computed(() => CAMERAS.filter(c => c.status === 'standby').length)
 const offlineCount = computed(() => CAMERAS.filter(c => c.status === 'offline').length)
-const faultCount = computed(() => CAMERAS.filter(c => c.status === 'fault').length)
 
 const filteredLog = computed(() => {
   if (logFilter.value === 'all') return DETECTION_LOG
@@ -150,7 +148,7 @@ const filteredLog = computed(() => {
 })
 
 function statusLabel(s: string) {
-  return { online: '在线', offline: '离线', fault: '故障', degraded: '降级' }[s] ?? s
+  return { online: '在线', standby: '待接入', offline: '离线', fault: '故障', degraded: '降级' }[s] ?? s
 }
 </script>
 
@@ -162,6 +160,7 @@ function statusLabel(s: string) {
 .top-stats { display: flex; gap: 8px; }
 .stat-chip { padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; }
 .stat-chip.online { background: #ECFDF5; color: #15803D; }
+.stat-chip.standby { background: #FEFCE8; color: #A16207; }
 .stat-chip.offline { background: #F3F4F6; color: #6B7280; }
 .stat-chip.fault { background: #FEF2F2; color: #DC2626; }
 
@@ -184,7 +183,8 @@ function statusLabel(s: string) {
 .mock-face { position: absolute; width: 40px; height: 48px; border: 2px solid rgba(255,255,255,0.6); border-radius: 4px; }
 .mock-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 9px; color: #fff; background: rgba(0,0,0,0.6); padding: 1px 6px; border-radius: 3px; }
 .cam-degraded-msg { color: #F97316; font-size: 12px; font-weight: 600; }
-.cam-offline-msg { color: rgba(255,255,255,0.4); font-size: 13px; }
+.cam-msg { color: rgba(255,255,255,0.4); font-size: 13px; }
+.cam-msg.standby { display: flex; flex-direction: column; align-items: center; gap: 8px; color: rgba(255,255,255,0.35); }
 
 .cam-info { padding: 14px; }
 .cam-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }

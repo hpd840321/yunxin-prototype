@@ -271,13 +271,10 @@ export const PARENT_CHILDREN: Record<string, number[]> = {
 // ============================================================
 
 export const CAMERAS: Camera[] = [
-  { id: 1,  name: 'A-101 教室主摄',   classroom: '初一(1)班', ip: '192.168.1.101', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 12450, todayFaces: 285 },
-  { id: 2,  name: 'A-101 教室侧摄',   classroom: '初一(1)班', ip: '192.168.1.102', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 11820, todayFaces: 270 },
-  { id: 3,  name: 'A-102 教室主摄',   classroom: '初一(2)班', ip: '192.168.1.103', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:27:58', todayDetections: 13100, todayFaces: 302 },
-  { id: 4,  name: 'A-102 教室侧摄',   classroom: '初一(2)班', ip: '192.168.1.104', status: 'degraded', scene: 'classroom', resolution: '1920×1080', fps: 15, lastSeen: '2026-06-25T17:25:00', todayDetections: 8920, todayFaces: 198 },
-  { id: 5,  name: 'B-201 走廊',       classroom: '',           ip: '192.168.1.201', status: 'online',  scene: 'corridor',  resolution: '1920×1080', fps: 15, lastSeen: '2026-06-25T17:28:00', todayDetections: 3200,  todayFaces: 0 },
-  { id: 6,  name: 'C-301 食堂入口',   classroom: '',           ip: '192.168.1.301', status: 'online',  scene: 'canteen',   resolution: '2560×1440', fps: 10, lastSeen: '2026-06-25T17:20:00', todayDetections: 0,     todayFaces: 0 },
-  { id: 7,  name: 'D-401 操场',       classroom: '',           ip: '192.168.1.401', status: 'offline', scene: 'playground', resolution: '2560×1440', fps: 20, lastSeen: '2026-06-25T12:00:00', todayDetections: 0,     todayFaces: 0 },
+  { id: 1, name: '初一(1)班 讲台主摄', classroom: '初一(1)班', ip: '192.168.1.101', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 12450, todayFaces: 285 },
+  { id: 2, name: '初一(2)班 讲台主摄', classroom: '初一(2)班', ip: '192.168.1.102', status: 'online',  scene: 'classroom', resolution: '1920×1080', fps: 25, lastSeen: '2026-06-25T17:28:00', todayDetections: 13100, todayFaces: 302 },
+  { id: 3, name: '食堂入口',           classroom: '',           ip: '192.168.1.201', status: 'standby', scene: 'canteen',   resolution: '2560×1440', fps: 10, lastSeen: '2026-06-25T17:20:00', todayDetections: 0,     todayFaces: 0 },
+  { id: 4, name: '学校大门',           classroom: '',           ip: '192.168.1.202', status: 'standby', scene: 'gate',      resolution: '2560×1440', fps: 15, lastSeen: '2026-06-25T17:20:00', todayDetections: 0,     todayFaces: 0 },
 ]
 
 // ============================================================
@@ -355,7 +352,7 @@ export const DETECTION_LOG: DetectionEvent[] = SAMPLE_EVENTS.map((e, i) => {
   return {
     id: 2000 + i,
     timestamp: ts,
-    cameraId: [1, 2, 3, 4][i % 4],
+    cameraId: e.studentId ? (e.studentId < 200 ? 1 : 2) : (i % 2 === 0 ? 1 : 2),
     studentId: e.studentId,
     studentName: e.studentId ? STUDENT_MAP[e.studentId]?.name ?? null : null,
     confidence: 0.82 + Math.random() * 0.16,
