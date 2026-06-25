@@ -1,81 +1,81 @@
 <template>
   <div class="dashboard-page">
-    <!-- 顶栏 -->
     <header class="top-bar">
       <div>
         <h1 class="page-title">班级概览</h1>
-        <p class="page-subtitle">初一(1)班 · 第25周（2026.06.15 - 06.21）</p>
+        <p class="page-subtitle">{{ selectedClass }} · 第25周（2026.06.15 - 06.21）</p>
       </div>
       <div class="top-actions">
-        <button class="btn-outline" @click="store.toggleMask()">
-          {{ store.maskMode ? '解除脱敏' : '投屏脱敏' }}
-        </button>
+        <button class="btn-outline" @click="store.toggleMask()">{{ store.maskMode ? '解除脱敏' : '投屏脱敏' }}</button>
       </div>
     </header>
 
-    <!-- 风险分布卡片 -->
-    <section class="stats-row">
-      <div v-for="s in statsCards" :key="s.label" class="stat-card" :style="{ borderLeftColor: s.color }">
-        <span class="stat-value" :style="{ color: s.color }">{{ s.count }}</span>
-        <span class="stat-label">{{ s.label }}</span>
-      </div>
-    </section>
+    <div class="page-body">
+      <aside class="page-sidebar">
+        <h3 class="sidebar-title">组织架构</h3>
+        <GradeClassTree v-model:selected="selectedClass" />
+      </aside>
 
-    <!-- 预警列表 -->
-    <section class="section-card">
-      <h2 class="section-title">
-        <span>待处理预警</span>
-        <span class="badge-warn">{{ activeAlerts.length }}条</span>
-      </h2>
-      <div class="alert-list">
-        <div v-for="a in activeAlerts" :key="a.id" class="alert-item" :style="{ borderLeftColor: RISK_LEVEL_COLORS[a.level] }">
-          <div class="alert-left">
-            <div class="alert-header">
-              <span class="alert-name">{{ store.maskMode ? (a.studentName[0] + '同学') : a.studentName }}</span>
-              <RiskBadge :level="a.level" size="sm" />
-              <span class="alert-class">{{ a.className }}</span>
+      <div class="page-content">
+        <!-- 风险分布 -->
+        <section class="stats-row">
+          <div v-for="s in statsCards" :key="s.label" class="stat-card" :style="{ borderLeftColor: s.color }">
+            <span class="stat-value" :style="{ color: s.color }">{{ s.count }}</span>
+            <span class="stat-label">{{ s.label }}</span>
+          </div>
+        </section>
+
+        <!-- 预警列表 -->
+        <section class="section-card">
+          <h2 class="section-title">
+            <span>待处理预警</span>
+            <span class="badge-warn">{{ activeAlerts.length }}条</span>
+          </h2>
+          <div class="alert-list">
+            <div v-for="a in activeAlerts" :key="a.id" class="alert-item" :style="{ borderLeftColor: RISK_LEVEL_COLORS[a.level] }">
+              <div class="alert-left">
+                <div class="alert-header">
+                  <span class="alert-name">{{ store.maskMode ? (a.studentName[0] + '同学') : a.studentName }}</span>
+                  <RiskBadge :level="a.level" size="sm" />
+                  <span class="alert-class">{{ a.className }}</span>
+                </div>
+                <p class="alert-desc">{{ a.description }}</p>
+                <p class="alert-action">建议：{{ a.suggestedAction }}</p>
+              </div>
+              <div class="alert-right">
+                <button class="btn-primary" @click="viewStudent(a.studentId)">查看画像</button>
+              </div>
             </div>
-            <p class="alert-desc">{{ a.description }}</p>
-            <p class="alert-action">建议：{{ a.suggestedAction }}</p>
           </div>
-          <div class="alert-right">
-            <button class="btn-primary" @click="viewStudent(a.studentId)">查看画像</button>
-          </div>
-        </div>
-      </div>
-      <div v-if="activeAlerts.length === 0" class="empty-state">
-        <p>暂无待处理预警</p>
-      </div>
-    </section>
+          <div v-if="activeAlerts.length === 0" class="empty-state"><p>暂无待处理预警</p></div>
+        </section>
 
-    <!-- 全班学生列表 -->
-    <section class="section-card">
-      <h2 class="section-title">全班学生周状态</h2>
-      <div class="student-grid">
-        <StudentCard
-          v-for="p in classProfiles"
-          :key="p.student.id"
-          :profile="p"
-          @click="viewStudent(p.student.id)"
-        />
+        <!-- 学生列表 -->
+        <section class="section-card">
+          <h2 class="section-title">{{ selectedClass }} 学生周状态</h2>
+          <div class="student-grid">
+            <StudentCard v-for="p in classProfiles" :key="p.student.id" :profile="p" @click="viewStudent(p.student.id)" />
+          </div>
+        </section>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { RISK_LEVEL_COLORS, RISK_LEVEL_LABELS } from '@/types'
-import type { RiskLevel } from '@/types'
+import { RISK_LEVEL_COLORS } from '@/types'
 import RiskBadge from '@/components/RiskBadge.vue'
 import StudentCard from '@/components/StudentCard.vue'
+import GradeClassTree from '@/components/GradeClassTree.vue'
 
 const router = useRouter()
 const store = useAppStore()
+const selectedClass = ref('初一(1)班')
 
-const classProfiles = computed(() => store.allProfiles.filter(p => p.student.className === '初一(1)班'))
+const classProfiles = computed(() => store.allProfiles.filter(p => p.student.className === selectedClass.value))
 
 const statsCards = computed(() => {
   const counts = { green: 0, greenYellowTrend: 0, yellow: 0, yellowRedTrend: 0, red: 0, black: 0 }
@@ -104,17 +104,8 @@ function viewStudent(id: number) {
 </script>
 
 <style scoped>
-.dashboard-page {
-  padding: 32px;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-}
+.dashboard-page { padding: 32px; max-width: 1300px; margin: 0 auto; }
+.top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
 .page-title { font-size: 24px; font-weight: 800; color: #0F172A; margin: 0 0 4px; }
 .page-subtitle { font-size: 13px; color: #9CA3AF; margin: 0; }
 .btn-outline {
@@ -129,6 +120,11 @@ function viewStudent(id: number) {
   transition: all 0.15s;
 }
 .btn-outline:hover { border-color: #15803D; color: #15803D; }
+
+.page-body { display: flex; gap: 24px; align-items: flex-start; }
+.page-sidebar { width: 220px; flex-shrink: 0; background: #fff; border-radius: 16px; border: 1px solid #E2EFE7; padding: 16px; position: sticky; top: 32px; }
+.sidebar-title { font-size: 13px; font-weight: 700; color: #0F172A; margin: 0 0 8px; padding-bottom: 8px; border-bottom: 1px solid #F0F7F3; }
+.page-content { flex: 1; min-width: 0; }
 
 .stats-row {
   display: grid;
