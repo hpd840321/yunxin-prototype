@@ -2,6 +2,7 @@ import type {
   Student, StudentRiskProfile, WeeklyMetrics, IndividualBaseline,
   ClassRiskDistribution, AlertItem, Teacher,
   Camera, DetectionEvent, AIPipelineStage, DailySample, EmotionScores, GradeClassNode,
+  Lesson, Snapshot, FaceDetection,
 } from '@/types'
 
 // ============================================================
@@ -487,5 +488,113 @@ for (const s of STUDENTS) {
     registered,
     quality: registered ? 0.78 + Math.random() * 0.18 : 0,
     lastUpdated: registered ? '2026-06-' + String(15 + (s.id % 10)).padStart(2, '0') : '',
+  }
+}
+
+// ============================================================
+// 课程表数据
+// ============================================================
+
+const SCHEDULE_TEMPLATES: Record<string, Array<{ weekday: number; period: number; start: string; end: string; subject: string; teacher: string }>> = {
+  '初一(1)班': [
+    { weekday: 1, period: 0, start: '08:00', end: '08:45', subject: '语文', teacher: '王建国' },
+    { weekday: 1, period: 1, start: '08:55', end: '09:40', subject: '数学', teacher: '林小燕' },
+    { weekday: 1, period: 2, start: '09:50', end: '10:35', subject: '英语', teacher: '何志强' },
+    { weekday: 2, period: 0, start: '08:00', end: '08:45', subject: '数学', teacher: '林小燕' },
+    { weekday: 2, period: 1, start: '08:55', end: '09:40', subject: '英语', teacher: '何志强' },
+    { weekday: 2, period: 2, start: '09:50', end: '10:35', subject: '语文', teacher: '王建国' },
+    { weekday: 3, period: 0, start: '08:00', end: '08:45', subject: '英语', teacher: '何志强' },
+    { weekday: 3, period: 1, start: '08:55', end: '09:40', subject: '语文', teacher: '王建国' },
+    { weekday: 3, period: 2, start: '09:50', end: '10:35', subject: '数学', teacher: '林小燕' },
+    { weekday: 4, period: 0, start: '08:00', end: '08:45', subject: '数学', teacher: '林小燕' },
+    { weekday: 4, period: 1, start: '08:55', end: '09:40', subject: '历史', teacher: '黄磊' },
+    { weekday: 4, period: 2, start: '09:50', end: '10:35', subject: '语文', teacher: '王建国' },
+    { weekday: 5, period: 0, start: '08:00', end: '08:45', subject: '语文', teacher: '王建国' },
+    { weekday: 5, period: 1, start: '08:55', end: '09:40', subject: '英语', teacher: '何志强' },
+    { weekday: 5, period: 2, start: '09:50', end: '10:35', subject: '班会', teacher: '王建国' },
+  ],
+}
+
+// Generate LESSONS for the week
+const WEEK_DATES = ['2026-06-22', '2026-06-23', '2026-06-24', '2026-06-25', '2026-06-26']
+const CLASS_IDS: Record<string, number> = { '初一(1)班': 1, '初一(2)班': 2, '初一(3)班': 3, '初一(4)班': 4, '初二(1)班': 5, '初二(2)班': 6, '初二(3)班': 7, '初三(1)班': 8, '初三(2)班': 9 }
+
+export const LESSONS: Lesson[] = []
+let lessonId = 1
+for (const [className, template] of Object.entries(SCHEDULE_TEMPLATES)) {
+  const cid = CLASS_IDS[className]
+  for (const entry of template) {
+    LESSONS.push({
+      id: lessonId++,
+      classId: cid,
+      weekday: entry.weekday as 1 | 2 | 3 | 4 | 5,
+      period: entry.period,
+      start: entry.start,
+      end: entry.end,
+      subject: entry.subject,
+      teacherName: entry.teacher,
+      date: WEEK_DATES[entry.weekday - 1],
+      isSpecial: false,
+    })
+  }
+}
+
+// ============================================================
+// 全景快照数据
+// ============================================================
+
+const CLASS_CAMERA_MAP: Record<number, number> = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9 }
+
+export const SNAPSHOTS: Snapshot[] = []
+let snapshotId = 1
+for (const lesson of LESSONS) {
+  const numShots = (lesson.id % 3) + 1
+  for (let s = 0; s < numShots; s++) {
+    const offset = 2 + s * 20 + Math.round(Math.random() * 8)
+    const [h, m] = lesson.start.split(':').map(Number)
+    const totalMin = h * 60 + m + offset
+    const captureH = Math.floor(totalMin / 60)
+    const captureM = totalMin % 60
+    SNAPSHOTS.push({
+      id: snapshotId++,
+      lessonId: lesson.id,
+      captureTime: `${lesson.date}T${String(captureH).padStart(2, '0')}:${String(captureM).padStart(2, '0')}:00`,
+      cameraId: CLASS_CAMERA_MAP[lesson.classId] ?? 1,
+      photoPath: `/mock/snapshots/c${lesson.classId}_${lesson.date}_${String(captureH).padStart(2, '0')}${String(captureM).padStart(2, '0')}.jpg`,
+      status: 'done',
+      totalFaces: 38 + Math.floor(Math.random() * 10),
+      recognizedCount: 32 + Math.floor(Math.random() * 8),
+    })
+  }
+}
+
+// ============================================================
+// 人脸检测结果
+// ============================================================
+
+const CLASS_NAME_MAP: Record<number, string> = {}
+for (const s of STUDENTS) { CLASS_NAME_MAP[s.id] = s.className }
+
+export const SNAPSHOT_DETECTIONS: FaceDetection[] = []
+let detId = 1
+for (const snap of SNAPSHOTS.slice(0, 60)) {
+  const snapshotLessons = LESSONS.find(l => l.id === snap.lessonId)
+  if (!snapshotLessons) continue
+  const className = Object.entries(CLASS_IDS).find(([, v]) => v === snapshotLessons.classId)?.[0]
+  if (!className) continue
+  const classStudents = STUDENTS.filter(s => s.className === className)
+  const present = classStudents.slice(0, 6 + Math.floor(Math.random() * Math.min(classStudents.length - 6, 3)))
+  for (let i = 0; i < present.length; i++) {
+    const stud = present[i]
+    SNAPSHOT_DETECTIONS.push({
+      id: detId++,
+      snapshotId: snap.id,
+      studentId: stud.id,
+      studentName: stud.name,
+      faceBox: { x: 8 + i * 12, y: 12 + (i % 4) * 20, w: 6, h: 8 },
+      confidence: Math.round((0.78 + Math.random() * 0.18) * 100) / 100,
+      faceQuality: Math.round((0.7 + Math.random() * 0.25) * 100) / 100,
+      recognized: Math.random() > 0.15,
+    })
   }
 }

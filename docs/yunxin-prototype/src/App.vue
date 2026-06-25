@@ -50,7 +50,7 @@ import { NConfigProvider, NMessageProvider, zhCN, dateZhCN } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
 import { ROLE_LABELS } from '@/types'
 import {
-  LayoutDashboard, Activity, Heart, ClipboardList, UserRound, Shield, Camera,
+  LayoutDashboard, Camera, CalendarDays, ScanFace, BarChart3, Heart, ClipboardList, UserRound, Shield,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -66,27 +66,24 @@ const roleIcon = computed(() => {
 const navItems = computed(() => {
   const role = store.currentRole
   const baseItems = [
-    { path: '/dashboard',   label: '班级概览', icon: LayoutDashboard },
-    { path: '/cameras',     label: '摄像头',   icon: Camera },
-    { path: '/ai-analytics',label: 'AI 分析',  icon: Activity },
-    { path: '/counselor',   label: '全校脉搏', icon: Heart },
-    { path: '/records',     label: '干预记录', icon: ClipboardList },
+    { path: '/dashboard',   label: '情绪驾驶舱', icon: LayoutDashboard },
+    { path: '/schedule',    label: '课程表',     icon: CalendarDays },
+    { path: '/faces',       label: '人脸底库',   icon: ScanFace },
+    { path: '/reports',     label: '分析报告',   icon: BarChart3 },
+    { path: '/records',     label: '干预记录',   icon: ClipboardList },
   ]
-  // 系统管理员
   if (role === 'admin') {
     return [
       { path: '/admin',       label: '系统管理', icon: Shield },
       ...baseItems,
     ]
   }
-  // 家长
   if (role === 'parent') {
     return [
       { path: '/parent', label: '子女状态', icon: Heart },
       { path: '/records', label: '记录',   icon: ClipboardList },
     ]
   }
-  // 校领导/心理老师/班主任
   return baseItems
 })
 
