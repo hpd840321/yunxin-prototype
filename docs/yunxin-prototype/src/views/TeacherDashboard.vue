@@ -2,8 +2,8 @@
   <div class="dashboard-page">
     <header class="top-bar">
       <div>
-        <h1 class="page-title">班级概览</h1>
-        <p class="page-subtitle">{{ selectedClass }} · 第25周（2026.06.15 - 06.21）</p>
+        <h1 class="page-title">情绪驾驶舱</h1>
+        <p class="page-subtitle">{{ selectedClass }} · 第25周（2026.06.22 - 06.26） · {{ todayLessons.length }}节课</p>
       </div>
       <div class="top-actions">
         <button class="btn-outline" @click="store.toggleMask()">{{ store.maskMode ? '解除脱敏' : '投屏脱敏' }}</button>
@@ -25,14 +25,35 @@
           </div>
         </section>
 
+        <!-- 今日课程 -->
+        <section class="section-card">
+          <h2 class="section-title">今日课程 · {{ selectedDate }}</h2>
+          <div class="lesson-summary-list">
+            <div v-for="lesson in todayLessons" :key="lesson.id" class="lesson-summary-item" @click="viewLesson(lesson)">
+              <div class="lesson-summary-left">
+                <span class="lesson-summary-period">{{ '第' + (lesson.period + 1) + '节' }}</span>
+                <div class="lesson-summary-body">
+                  <span class="lesson-summary-subject">{{ lesson.subject }}</span>
+                  <span class="lesson-summary-time">{{ lesson.start }}-{{ lesson.end }}</span>
+                </div>
+              </div>
+              <div class="lesson-summary-right">
+                <span class="lesson-summary-teacher">{{ lesson.teacherName }}</span>
+                <span class="lesson-summary-status done">✅ 已分析</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- 预警列表 -->
         <section class="section-card">
           <h2 class="section-title">
-            <span>待处理预警</span>
+            <span>重点关注</span>
             <span class="badge-warn">{{ activeAlerts.length }}条</span>
           </h2>
           <div class="alert-list">
             <div v-for="a in activeAlerts" :key="a.id" class="alert-item" :style="{ borderLeftColor: RISK_LEVEL_COLORS[a.level] }">
+              <FaceThumb :name="store.maskMode ? '?' : a.studentName" state="withdrawn" size="md" :masked="store.maskMode" />
               <div class="alert-left">
                 <div class="alert-header">
                   <span class="alert-name">{{ store.maskMode ? (a.studentName[0] + '同学') : a.studentName }}</span>
@@ -67,15 +88,21 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { RISK_LEVEL_COLORS } from '@/types'
+import { LESSONS, CLASS_IDS } from '@/mock/data'
 import RiskBadge from '@/components/RiskBadge.vue'
 import StudentCard from '@/components/StudentCard.vue'
 import GradeClassTree from '@/components/GradeClassTree.vue'
+import FaceThumb from '@/components/FaceThumb.vue'
 
 const router = useRouter()
 const store = useAppStore()
 const selectedClass = ref('初一(1)班')
+const selectedDate = ref('2026-06-25')
 
 const classProfiles = computed(() => store.allProfiles.filter(p => p.student.className === selectedClass.value))
+const todayLessons = computed(() =>
+  LESSONS.filter(l => l.classId === CLASS_IDS[selectedClass.value] && l.date === selectedDate.value).sort((a, b) => a.period - b.period)
+)
 
 const statsCards = computed(() => {
   const counts = { green: 0, greenYellowTrend: 0, yellow: 0, yellowRedTrend: 0, red: 0, black: 0 }
@@ -100,6 +127,9 @@ const activeAlerts = computed(() => store.allAlerts.filter(a => {
 function viewStudent(id: number) {
   store.selectStudent(id)
   router.push(`/student/${id}`)
+}
+function viewLesson(lesson: any) {
+  router.push(`/class/${lesson.classId}/date/${lesson.date}`)
 }
 </script>
 
@@ -171,12 +201,24 @@ function viewStudent(id: number) {
   border-radius: 10px;
 }
 
+.lesson-summary-list { display: flex; flex-direction: column; gap: 8px; }
+.lesson-summary-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: 12px; border: 1px solid #E2EFE7; cursor: pointer; transition: all 0.15s; }
+.lesson-summary-item:hover { border-color: #A7F3D0; background: #F0FDF4; }
+.lesson-summary-left { display: flex; align-items: center; gap: 12px; }
+.lesson-summary-period { font-size: 11px; font-weight: 700; color: #15803D; background: #ECFDF5; padding: 2px 8px; border-radius: 6px; }
+.lesson-summary-body { display: flex; flex-direction: column; }
+.lesson-summary-subject { font-size: 14px; font-weight: 700; color: #1F2937; }
+.lesson-summary-time { font-size: 11px; color: #9CA3AF; }
+.lesson-summary-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.lesson-summary-teacher { font-size: 12px; color: #4B5563; }
+.lesson-summary-status { font-size: 11px; font-weight: 600; }
+.lesson-summary-status.done { color: #15803D; }
+
 .alert-list { display: flex; flex-direction: column; gap: 12px; }
 .alert-item {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: 14px;
   padding: 16px;
   border-radius: 12px;
   background: #FAFAFA;

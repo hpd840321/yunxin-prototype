@@ -517,7 +517,7 @@ const SCHEDULE_TEMPLATES: Record<string, Array<{ weekday: number; period: number
 
 // Generate LESSONS for the week
 const WEEK_DATES = ['2026-06-22', '2026-06-23', '2026-06-24', '2026-06-25', '2026-06-26']
-const CLASS_IDS: Record<string, number> = { '初一(1)班': 1, '初一(2)班': 2, '初一(3)班': 3, '初一(4)班': 4, '初二(1)班': 5, '初二(2)班': 6, '初二(3)班': 7, '初三(1)班': 8, '初三(2)班': 9 }
+export const CLASS_IDS: Record<string, number> = { '初一(1)班': 1, '初一(2)班': 2, '初一(3)班': 3, '初一(4)班': 4, '初二(1)班': 5, '初二(2)班': 6, '初二(3)班': 7, '初三(1)班': 8, '初三(2)班': 9 }
 
 export const LESSONS: Lesson[] = []
 let lessonId = 1
