@@ -55,14 +55,7 @@
                 <div class="detail-name">{{ selectedDetection.studentName || '未识别' }}</div>
                 <div class="detail-meta">置信度 {{ (selectedDetection.confidence * 100).toFixed(0) }}% · 人脸质量 {{ (selectedDetection.faceQuality * 100).toFixed(0) }}%</div>
               </div>
-              <div class="detail-section">
-                <div class="detail-section-title">情绪概率</div>
-                <div v-for="e in detectionEmotions" :key="e.key" class="emotion-bar-row">
-                  <span class="emotion-label" :style="{ color: e.color }">{{ e.label }}</span>
-                  <div class="emotion-bar-track"><div class="emotion-bar-fill" :style="{ width: e.pct + '%', background: e.color }" /></div>
-                  <span class="emotion-pct">{{ e.pct }}%</span>
-                </div>
-              </div>
+              <EmotionRadar :emotions="mockEmotions" height="180px" />
             </div>
             <div class="snapshot-detail empty-detail" v-else><p>点击人脸框查看检测详情</p></div>
           </div>
@@ -85,6 +78,7 @@ import { LESSONS, SNAPSHOTS, SNAPSHOT_DETECTIONS } from '@/mock/data'
 import { EMOTION_7 } from '@/types'
 import GradeClassTree from '@/components/GradeClassTree.vue'
 import FaceThumb from '@/components/FaceThumb.vue'
+import EmotionRadar from '@/components/EmotionRadar.vue'
 
 const CLASS_IDS: Record<string, number> = { '初一(1)班':1,'初一(2)班':2,'初一(3)班':3,'初一(4)班':4,'初二(1)班':5,'初二(2)班':6,'初二(3)班':7,'初三(1)班':8,'初三(2)班':9 }
 
@@ -131,6 +125,11 @@ function selectLesson(lesson: any) { activeLesson.value = lesson; currentSnapIdx
 function detState(_id: number) { const r=Math.random(); return r>0.6?'engaged':r>0.3?'confused':'withdrawn' }
 function lessonStatus(lesson: any) { const s=lessonSnapshots(lesson); return s.length===0?'pending':s.every(x=>x.status==='done')?'done':'analyzing' }
 function displayName(det: any) { return det.studentName || '未识别' }
+const mockEmotions = computed(() => {
+  const e: Record<string, number> = {}
+  EMOTION_7.forEach(em => { e[em.key] = 0.05 + Math.random() * 0.35 })
+  return e
+})
 function prevSnap() { if(currentSnapIdx.value>0){currentSnapIdx.value--;selectedDetection.value=null} }
 function nextSnap() { if(currentSnapIdx.value<lessonSnapshots(activeLesson.value).length-1){currentSnapIdx.value++;selectedDetection.value=null} }
 function prevDate() { shiftDate(-1) }
