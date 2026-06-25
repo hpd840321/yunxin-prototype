@@ -53,7 +53,7 @@
           </h2>
           <div class="alert-list">
             <div v-for="a in activeAlerts" :key="a.id" class="alert-item" :style="{ borderLeftColor: RISK_LEVEL_COLORS[a.level] }">
-              <FaceThumb :name="store.maskMode ? '?' : a.studentName" state="withdrawn" size="md" :masked="store.maskMode" />
+              <FaceThumb :name="store.maskMode ? '?' : a.studentName" state="withdrawn" size="md" :masked="store.maskMode" :seed="a.studentId" />
               <div class="alert-left">
                 <div class="alert-header">
                   <span class="alert-name">{{ store.maskMode ? (a.studentName[0] + '同学') : a.studentName }}</span>

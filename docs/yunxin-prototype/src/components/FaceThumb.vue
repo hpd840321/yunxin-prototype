@@ -17,7 +17,8 @@ const props = withDefaults(defineProps<{
   masked?: boolean
   registered?: boolean
   confidence?: number
-  imgUrl?: string        // 外部图片URL，有则优先显示
+  imgUrl?: string
+  seed?: string | number    // 头像种子（用学生ID替代中文名）
 }>(), { state: 'unknown', size: 'md', registered: true })
 
 const imgError = ref(false)
@@ -31,7 +32,7 @@ const thumbStyle = computed(() => ({
   height: sizeMap[props.size] + 'px',
 }))
 
-const seed = computed(() => encodeURIComponent(props.name.replace(/\s+/g, '')))
+const seed = computed(() => props.seed ?? props.name.replace(/\s+/g, ''))
 const imgSrc = computed(() => {
   if (props.masked) return undefined
   if (props.imgUrl) return props.imgUrl

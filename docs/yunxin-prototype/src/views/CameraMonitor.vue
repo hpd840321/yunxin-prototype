@@ -38,7 +38,7 @@
                 <div v-for="det in currentDetections" :key="det.id" class="detection-marker"
                   :style="{ left: det.faceBox.x + '%', top: det.faceBox.y + '%', width: det.faceBox.w + '%' }"
                   @click="selectedDetection = det">
-                  <FaceThumb :name="displayName(det)" :state="detState(det.id)" :confidence="det.confidence" size="sm" :registered="det.recognized" :masked="false" />
+                  <FaceThumb :name="displayName(det)" :state="detState(det.id)" :confidence="det.confidence" size="sm" :registered="det.recognized" :masked="false" :seed="det.studentId ?? 0" />
                   <div class="det-label">{{ displayName(det) }}</div>
                 </div>
               </div>
@@ -51,7 +51,7 @@
             <div class="snapshot-detail" v-if="selectedDetection">
               <h3 class="detail-title">检测详情</h3>
               <div class="detail-face">
-                <FaceThumb :name="selectedDetection.studentName ?? '?'" state="engaged" size="lg" :confidence="selectedDetection.confidence" />
+                <FaceThumb :name="selectedDetection.studentName ?? '?'" state="engaged" size="lg" :confidence="selectedDetection.confidence" :seed="selectedDetection.studentId ?? 0" />
                 <div class="detail-name">{{ selectedDetection.studentName || '未识别' }}</div>
                 <div class="detail-meta">置信度 {{ (selectedDetection.confidence * 100).toFixed(0) }}% · 人脸质量 {{ (selectedDetection.faceQuality * 100).toFixed(0) }}%</div>
               </div>

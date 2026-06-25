@@ -21,7 +21,7 @@
       <div class="page-content">
         <div class="face-grid">
           <div v-for="s in filteredStudents" :key="s.id" class="face-card" :class="{ unregistered: !enrollment(s).registered }">
-            <FaceThumb :name="s.name" state="engaged" size="lg" :registered="enrollment(s).registered" />
+            <FaceThumb :name="s.name" state="engaged" size="lg" :registered="enrollment(s).registered" :seed="s.id" />
             <div class="face-card-body">
               <div class="face-card-name">{{ s.name }}</div>
               <div v-if="enrollment(s).registered" class="face-card-quality" :style="{ color: qualityColor(enrollment(s).quality) }">
