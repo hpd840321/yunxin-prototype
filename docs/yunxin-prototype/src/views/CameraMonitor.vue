@@ -127,7 +127,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { CAMERAS, DETECTION_LOG, FACE_ENROLLMENT, STUDENTS } from '@/mock/data'
-import { SCENE_LABELS, STATE_LABELS, RAW_EMOTIONS } from '@/types'
+import { SCENE_LABELS, STATE_LABELS, EMOTION_7 } from '@/types'
 import GradeClassTree from '@/components/GradeClassTree.vue'
 
 const logFilter = ref<'all' | 1 | 2>('all')
@@ -165,7 +165,7 @@ function faceStateColor(state: string) {
 }
 
 function topEmotions(emotions: Record<string, number>) {
-  return RAW_EMOTIONS.map(e => ({ ...e, pct: +((emotions as any)[e.key] * 100).toFixed(0) }))
+  return EMOTION_7.map(e => ({ ...e, pct: +((emotions as any)[e.key] * 100).toFixed(0) }))
     .sort((a, b) => b.pct - a.pct).slice(0, 2)
 }
 
